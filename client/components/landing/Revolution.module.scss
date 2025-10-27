@@ -1,0 +1,209 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.revolutionContainer {
+  background: #011919;
+  width: 100%;
+  padding: 80px 0;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    background: transparent;
+    pointer-events: none;
+    z-index: 1;
+
+    @media (max-width: $mobile) {
+      height: 250px;
+      bottom: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(1, 25, 25, 0.3) 30%,
+        rgba(1, 25, 25, 0.6) 60%,
+        rgba(1, 25, 25, 0.9) 85%,
+        #011919 100%
+      );
+    }
+  }
+
+  @media (max-width: $tablet-max) {
+    padding: 60px 0;
+  }
+
+  @media (max-width: $mobile) {
+    padding: 40px 0 60px 0;
+  }
+}
+
+.titleSection {
+  margin-bottom: 60px;
+
+  @media (max-width: $tablet-max) {
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  @media (max-width: $mobile) {
+    margin-bottom: 32px;
+  }
+}
+
+.title {
+  font-family: var(--font-ibm-plex-mono);
+  font-size: 80px;
+  font-weight: 400;
+  line-height: 90%;
+  letter-spacing: -0.04em;
+  color: $text-primary;
+  margin: 0;
+  text-align: left;
+
+  @media (max-width: $tablet-max) {
+    font-size: 36px;
+    text-align: center;
+
+    br {
+      display: none;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    font-size: 32px;
+    line-height: 100%;
+  }
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+
+  @media (max-width: $tablet-max) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: $mobile) {
+    gap: 16px;
+  }
+}
+
+.card {
+  background: #011919;
+  border: 1px solid #015252;
+  border-radius: 20px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(1, 254, 145, 0.15);
+  }
+
+  @media (max-width: $tablet-max) {
+    padding: 32px;
+
+    .imageWrapper {
+      order: -1;
+      align-self: flex-end;
+      justify-content: flex-end;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    padding: 20px;
+    gap: 20px;
+  }
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.number {
+  font-family: var(--font-ibm-plex-mono);
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 120%;
+  letter-spacing: -0.04em;
+  color: #01FE91;
+
+  @media (max-width: $tablet-max) {
+    font-size: 32px;
+  }
+
+  @media (max-width: $mobile) {
+    font-size: 24px;
+  }
+}
+
+.cardTitle {
+  font-family: var(--font-ibm-plex-mono);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 120%;
+  letter-spacing: -0.04em;
+  color: #01FE91;
+  margin: 0;
+
+  @media (max-width: $tablet-max) {
+    font-size: 24px;
+  }
+
+  @media (max-width: $mobile) {
+    font-size: 20px;
+  }
+}
+
+.imageWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    object-fit: contain;
+
+    @media (max-width: $tablet-max) {
+      max-width: 180px;
+    }
+
+    @media (max-width: $mobile) {
+      max-width: 150px;
+    }
+  }
+}
+
+.description {
+  font-family: var(--font-ibm-plex-mono);
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 150%;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  flex: 1;
+
+  @media (max-width: $mobile) {
+    font-size: 13px;
+  }
+}
+
+.buttonWrapper {
+  margin-top: auto;
+}

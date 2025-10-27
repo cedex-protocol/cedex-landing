@@ -1,0 +1,30 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.container {
+  width: 100%;
+  max-width: $max-width;
+  margin: 0 auto;
+  padding-left: $container-padding-mobile;
+  padding-right: $container-padding-mobile;
+  box-sizing: border-box;
+
+  @media (min-width: $tablet-min) {
+    padding-left: $container-padding-tablet;
+    padding-right: $container-padding-tablet;
+  }
+
+  @media (min-width: $desktop-min) {
+    padding-left: $container-padding-desktop;
+    padding-right: $container-padding-desktop;
+  }
+
+  @media (min-width: $wide) {
+    padding-left: $container-padding-wide;
+    padding-right: $container-padding-wide;
+  }
+
+  &.fullWidth {
+    max-width: 100%;
+  }
+}

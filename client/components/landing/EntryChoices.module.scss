@@ -1,0 +1,954 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.contentWrapper {
+    padding-bottom: 200px;
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -50px;
+        left: 0;
+        right: 0;
+        height: 500px;
+        background: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(80, 190, 180, 0.15) 15%,
+            rgba(60, 150, 145, 0.25) 30%,
+            rgba(40, 110, 105, 0.4) 45%,
+            rgba(25, 70, 68, 0.6) 60%,
+            rgba(5, 32, 32, 0.8) 75%,
+            rgb(2, 31, 31) 90%,
+            #011919 100%
+        );
+        pointer-events: none;
+        z-index: 1;
+
+        @media (max-width: $tablet-max) {
+            height: 350px;
+            bottom: -50px;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(245, 254, 254, 0.1) 20%,
+                rgba(1, 25, 25, 0.3) 40%,
+                rgba(1, 25, 25, 0.5) 60%,
+                rgba(1, 25, 25, 0.8) 80%,
+                #011919 100%
+            );
+        }
+
+        @media (max-width: $mobile) {
+            height: 300px;
+            bottom: -40px;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(1, 25, 25, 0.1) 20%,
+                rgba(1, 25, 25, 0.3) 40%,
+                rgba(1, 25, 25, 0.5) 60%,
+                rgba(0, 0, 0, 0.831) 80%,
+                #011919 100%
+            );
+        }
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -750px;
+        bottom: -800px;
+        left: 0;
+        right: 0;
+        background: url('/images/entry-choices.png') no-repeat center;
+        background-size: cover;
+        pointer-events: none;
+
+        mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0,0,0,0.5) 10%,
+            rgba(0,0,0,1) 20%,
+            rgba(0,0,0,1) 100%
+        );
+        -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0,0,0,0.5) 10%,
+            rgba(0,0,0,1) 20%,
+            rgba(0,0,0,1) 100%
+        );
+
+
+        @media (max-width: $tablet-max) {
+            top: -750px;
+            bottom: -200px;
+            mask-image: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0,0,0,0.5) 10%,
+                rgba(0,0,0,1) 20%,
+                rgba(0,0,0,1) 100%
+            );
+            -webkit-mask-image: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0,0,0,0.5) 10%,
+                rgba(0,0,0,1) 20%,
+                rgba(0,0,0,1) 100%
+            );
+        }
+
+        @media (max-width: $mobile) {
+            top: -750px;
+            bottom: -400px;
+            mask-image: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0,0,0,0.5) 10%,
+                rgba(0,0,0,1) 20%,
+                rgba(0,0,0,1) 100%
+            );
+            -webkit-mask-image: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0,0,0,0.5) 10%,
+                rgba(0,0,0,1) 20%,
+                rgba(0,0,0,1) 100%
+            );
+        }
+    }
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+    position: relative;
+
+    @include mobile {
+        gap: 0;
+    }
+
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+        gap: 0;
+    }
+}
+
+.textContent {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+        text-align: center;
+        align-items: center;
+    }
+}
+
+.title {
+  font-family: var(--font-ibm-plex-mono);
+  color: $bg-dark-black;
+  font-size: 80px;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 90%;
+  letter-spacing: -0.04em;
+  text-align: right;
+  vertical-align: middle;
+
+  @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+    text-align: center;
+    font-size: 36px;
+  }
+
+  @include mobile {
+    text-align: center;
+    font-size: 36px;
+  }
+}
+
+.lowerContent {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    color: $bg-dark-black;
+
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+        text-align: center;
+    }
+
+    @include mobile {
+        text-align: center;
+    }
+
+    h2 {
+        font-family: var(--font-ibm-plex-mono);
+        font-size: 48px;
+        font-weight: 600;
+        font-style: normal;
+        vertical-align: middle;
+
+        @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+            font-size: 24px;
+        }
+
+        @include mobile {
+            font-size: 24px;
+        }
+    }
+
+    p {
+        font-family: var(--font-ibm-plex-mono);
+        font-size: 14px;
+        font-weight: 400;
+        font-style: normal;
+    }
+}
+
+.desktopBreak {
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+        display: none;
+    }
+
+    @include mobile {
+        display: none;
+    }
+}
+
+.cardContainer {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-top: 48px;
+
+    @media (max-width: $mobile) {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.cardWrapper {
+    width: 230px;
+    height: 303px;
+    perspective: 1000px;
+    transition: width 0.6s ease;
+
+    @media (max-width: $tablet-max) {
+        width: 100%;
+        height: 100px;
+        transition: height 0.6s ease;
+    }
+}
+
+.card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+
+    &.active {
+        transform: rotateY(180deg);
+    }
+
+    @media (max-width: $tablet-max) {
+        transform-style: flat;
+
+        &.active {
+            transform: none;
+        }
+    }
+}
+
+.cardWrapper:has(.card.active) {
+    width: 100%;
+    max-width: 692px;
+
+    .cardBack {
+        box-shadow: 0px 30px 40px -2px #02B28C80;
+    }
+
+    @media (max-width: $tablet-max) {
+        height: 270px;
+        max-width: 100%;
+    }
+}
+
+.cardFront,
+.cardBack {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 32px;
+    border-radius: 10px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.6s, opacity 0.6s ease, visibility 0.6s ease;
+    overflow: hidden;
+
+    @media (max-width: $tablet-max) {
+        padding: 24px;
+        position: absolute;
+        backface-visibility: visible;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 10px;
+        padding: 2px;
+        background: linear-gradient(180deg, rgba(2, 178, 140, 0.2) 0%, #02B28C 100%);
+        -webkit-mask:
+            linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask:
+            linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+}
+
+.cardFront {
+    align-items: flex-end;
+    justify-content: space-between;
+
+    @media (max-width: $tablet-max) {
+        align-items: center;
+        justify-content: space-between;
+        flex-direction: row;
+        padding: 24px 32px;
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.card.active .cardFront {
+    @media (max-width: $tablet-max) {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.cardBack {
+    transform: rotateY(180deg);
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    background: #31DDBB;
+
+    @media (max-width: $tablet-max) {
+        gap: 16px;
+        padding: 20px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        transform: none;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    &::before {
+        background: #02B28C !important;
+        border-radius: 10px;
+    }
+}
+
+.card.active .cardBack {
+    @media (max-width: $tablet-max) {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    h3 {
+        font-family: var(--font-ibm-plex-mono);
+        font-size: 32px;
+        font-weight: 600;
+        color: $bg-dark-black;
+        line-height: 90%;
+
+        @media (max-width: $tablet-max) {
+            font-size: 24px;
+            position: relative;
+            flex: 0 1 auto;
+        }
+    }
+
+    p {
+        font-family: var(--font-ibm-plex-mono);
+        font-size: 16px;
+        font-weight: 400;
+        color: $bg-dark-black;
+        line-height: 140%;
+        flex-grow: 1;
+
+        @media (max-width: $tablet-max) {
+            font-size: 14px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.6s ease, max-height 0.6s ease;
+            margin-bottom: 0;
+            position: relative;
+            flex: 1 1 100%;
+        }
+    }
+}
+
+.cardWrapper:has(.card.active) {
+    .cardBack p {
+        @media (max-width: $tablet-max) {
+            opacity: 1;
+            max-height: 200px;
+        }
+    }
+}
+
+.buttonWrapper {
+    align-self: flex-end;
+
+    @media (max-width: $tablet-max) {
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: opacity 0.6s ease, max-height 0.6s ease;
+        flex: 1 1 100%;
+        display: flex;
+        justify-content: flex-end;
+        position: relative;
+    }
+}
+
+.cardWrapper:has(.card.active) {
+    .buttonWrapper {
+        @media (max-width: $tablet-max) {
+            opacity: 1;
+            max-height: 100px;
+        }
+    }
+}
+
+.cardButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: transparent;
+    color: $bg-dark-black;
+    border: none;
+    font-family: var(--font-ibm-plex-mono);
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all $transition-base;
+    align-self: flex-end;
+    
+    span {
+        position: relative;
+    }
+    
+    .arrow {
+        width: 11px;
+        height: 11px;
+    }
+    
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 1px;
+        background: $bg-dark-black;
+        transition: width $transition-base;
+    }
+    
+    &:hover,
+    &:focus {
+        &::after {
+            width: min(138px, calc(100% + 32px));
+        }
+    }
+}
+
+.cardImage {
+    width: 62px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+
+    @media (max-width: $tablet-max) {
+        display: none;
+    }
+}
+
+.cardImageMobile {
+    display: none;
+
+    @media (max-width: $tablet-max) {
+        display: block;
+        width: 50px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+}
+
+.vectorImage {
+    position: absolute;
+    top: 1px;
+    right: 2px;
+    width: calc(179px - 4px);
+    height: calc(283px - 4px);
+    background: #01FFFF;
+    border-radius: 0 8px 0 0;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+
+    @media (max-width: $tablet-max) {
+        width: 45%;
+        height: calc(100% - 2px);
+        top: 1px;
+        right: 1px;
+        border-radius: 0 8px 8px 0;
+        -webkit-mask-position: right center;
+        mask-position: right center;
+        -webkit-mask-size: cover;
+        mask-size: cover;
+    }
+}
+
+.vectorTrade {
+    -webkit-mask-image: url('/images/Vector1.svg');
+    mask-image: url('/images/Vector1.svg');
+}
+
+.vectorProvide {
+    -webkit-mask-image: url('/images/Vector2.svg');
+    mask-image: url('/images/Vector2.svg');
+}
+
+.vectorBuild {
+    -webkit-mask-image: url('/images/Vector3.svg');
+    mask-image: url('/images/Vector3.svg');
+}
+
+.cardRole {
+    font-family: var(--font-ibm-plex-mono);
+    font-size: 32px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 90%;
+    letter-spacing: -0.04em;
+    vertical-align: middle;
+    color: $bg-dark-black;
+    align-self: flex-start;
+
+    @media (max-width: $tablet-max) {
+        font-size: 24px;
+        align-self: center;
+    }
+}
+
+// Modal content styles
+.modalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    height: 100%;
+
+    @include mobile {
+        gap: 12px;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+.modalHeader {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+
+    @include mobile {
+        gap: 8px;
+    }
+}
+
+.modalIcon {
+    width: 31px;
+    height: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @include mobile {
+        display: none;
+    }
+
+    img {
+        width: 31px;
+        height: 50px;
+        object-fit: contain;
+    }
+}
+
+.modalHeaderText {
+    flex: 1;
+}
+
+.modalTitle {
+    font-family: var(--font-ibm-plex-mono);
+    font-size: 32px;
+    font-weight: 600;
+    font-style: normal;
+    line-height: 90%;
+    letter-spacing: -0.04em;
+    vertical-align: middle;
+    color: $bg-dark-black;
+    margin-bottom: 12px;
+
+    @include mobile {
+        font-size: 20px;
+        margin-bottom: 4px;
+        line-height: 100%;
+    }
+}
+
+.modalDescription {
+    font-family: var(--font-ibm-plex-mono);
+    font-size: 18px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 130%;
+    letter-spacing: -0.04em;
+    vertical-align: middle;
+    color: $bg-dark-black;
+    opacity: 0.9;
+
+    @include mobile {
+        font-size: 13px;
+        line-height: 130%;
+    }
+}
+
+.benefitsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    width: 100%;
+    max-width: 729px;
+
+    @media (max-width: $tablet-max) {
+        grid-template-columns: repeat(2, 1fr);
+        height: auto;
+    }
+
+    @include mobile {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 8px;
+        text-align: center;
+    }
+}
+
+.benefitCard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    justify-content: flex-start;
+
+    @include mobile {
+        gap: 2px;
+        align-items: center;
+    }
+
+    h4 {
+        font-family: var(--font-ibm-plex-mono);
+        font-size: 18px;
+        font-weight: 600;
+        font-style: normal;
+        line-height: 130%;
+        letter-spacing: -0.04em;
+        vertical-align: middle;
+        color: $bg-dark-black;
+        min-height: 70px;
+        display: flex;
+        align-items: flex-start;
+
+        @include mobile {
+            font-size: 15px;
+            min-height: auto;
+            line-height: 120%;
+            justify-content: center;
+
+            br {
+                display: none;
+            }
+        }
+    }
+
+    p {
+        font-family: var(--font-ibm-plex-mono);
+        font-size: 14px;
+        font-weight: 400;
+        font-style: normal;
+        line-height: 130%;
+        letter-spacing: -0.04em;
+        vertical-align: middle;
+        color: $bg-dark-black;
+        opacity: 0.8;
+        flex: 1;
+        display: flex;
+        align-items: flex-start;
+
+        @include mobile {
+            font-size: 12px;
+            line-height: 120%;
+            justify-content: center;
+
+            br {
+                display: none;
+            }
+        }
+    }
+}
+
+.modalFooter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    @include mobile {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+}
+
+.exclusiveNote {
+    display: flex;
+    gap: 8px;
+    width: 295px;
+    height: 68px;
+    padding: 16px;
+    border-left: 2px solid $bg-dark-black;
+    background: rgba(1, 25, 25, 0.15);
+
+    @include mobile {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        padding: 12px;
+    }
+
+    .starIcon {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+    }
+
+    span {
+        font-family: var(--font-ibm-plex-mono);
+        font-size: 14px;
+        font-weight: 500;
+        font-style: normal;
+        line-height: 100%;
+        letter-spacing: 0;
+        color: $bg-dark-black;
+
+        @include mobile {
+            font-size: 12px;
+            line-height: 120%;
+        }
+    }
+}
+
+.connectButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: transparent;
+    color: $bg-dark-black;
+    border: none;
+    font-family: var(--font-ibm-plex-mono);
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all $transition-base;
+    white-space: nowrap;
+    
+    span {
+        position: relative;
+    }
+    
+    img {
+        width: 11px;
+        height: 11px;
+        filter: brightness(0);
+    }
+    
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: $bg-dark-black;
+        transform: scaleX(0);
+        transition: transform $transition-base;
+    }
+    
+    &:hover,
+    &:focus {
+        &::after {
+            transform: scaleX(1);
+        }
+    }
+}
+
+.mintStatus {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: var(--font-ibm-plex-mono);
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 8px 0;
+    
+    &.info {
+        background: rgba(0, 217, 255, 0.1);
+        color: #00D9FF;
+        border: 1px solid rgba(0, 217, 255, 0.3);
+    }
+    
+    &.success {
+        background: rgba(1, 254, 145, 0.1);
+        color: #01FE91;
+        border: 1px solid rgba(1, 254, 145, 0.3);
+    }
+    
+    &.error {
+        background: rgba(255, 87, 87, 0.1);
+        color: #FF5757;
+        border: 1px solid rgba(255, 87, 87, 0.3);
+    }
+}
+
+.loadingSpinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0, 217, 255, 0.3);
+    border-top-color: #00D9FF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loadingDots {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+
+    span {
+        width: 6px;
+        height: 6px;
+        background: currentColor;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+
+        &:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        &:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0s;
+        }
+    }
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.alreadyMinted {
+  display: flex;
+  gap: 8px;
+  width: 295px;
+  height: 68px;
+  padding: 16px;
+  border-left: 2px solid $bg-dark-black;
+  background: rgba(1, 25, 25, 0.15);
+
+  @include mobile {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    padding: 12px;
+  }
+
+  .starIcon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  span {
+    font-family: var(--font-ibm-plex-mono);
+    font-size: 14px;
+    font-weight: 500;
+    font-style: normal;
+    line-height: 100%;
+    letter-spacing: 0;
+    color: $bg-dark-black;
+
+    @include mobile {
+      font-size: 12px;
+      line-height: 120%;
+    }
+  }
+}

@@ -1,0 +1,77 @@
+@use '@/styles/variables' as *;
+
+.section {
+  position: relative;
+  width: 100%;
+
+  // Padding top variants
+  &.pt-none {
+    padding-top: 0;
+  }
+
+  &.pt-small {
+    padding-top: $spacing-2xl;
+
+    @media (min-width: $tablet-min) {
+      padding-top: $spacing-3xl;
+    }
+  }
+
+  &.pt-medium {
+    padding-top: $spacing-3xl;
+
+    @media (min-width: $tablet-min) {
+      padding-top: 5rem;
+    }
+
+    @media (min-width: $desktop-min) {
+      padding-top: 6rem;
+    }
+  }
+
+  &.pt-large {
+    padding-top: 200px;
+  }
+
+  // Padding bottom variants
+  &.pb-none {
+    padding-bottom: 0;
+  }
+
+  &.pb-small {
+    padding-bottom: $spacing-2xl;
+
+    @media (min-width: $tablet-min) {
+      padding-bottom: $spacing-3xl;
+    }
+  }
+
+  &.pb-medium {
+    padding-bottom: $spacing-3xl;
+
+    @media (min-width: $tablet-min) {
+      padding-bottom: 5rem;
+    }
+
+    @media (min-width: $desktop-min) {
+      padding-bottom: 6rem;
+    }
+  }
+
+  &.pb-large {
+    padding-bottom: 200px;
+  }
+
+  // Background variants
+  &.bg-transparent {
+    background: transparent;
+  }
+
+  &.bg-dark {
+    background: $bg-dark;
+  }
+
+  &.bg-gradient {
+    background: linear-gradient(180deg, $bg-gradient-1 0%, $bg-gradient-2 100%);
+  }
+}

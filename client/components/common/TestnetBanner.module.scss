@@ -1,0 +1,68 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.banner {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - #{$container-padding-mobile * 2});
+  max-width: $max-width;
+  background: linear-gradient(90deg, rgba($primary-color, 0.15) 0%, rgba($secondary-color, 0.15) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba($primary-color, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+
+  @include tablet {
+    top: 100px;
+    width: calc(100% - #{$container-padding-tablet * 2});
+    padding: 12px 48px;
+  }
+
+  @include desktop {
+    top: 100px;
+    width: calc(100% - #{$container-padding-desktop * 2});
+    padding: 12px 80px;
+  }
+
+  @include wide {
+    width: calc(100% - #{$container-padding-wide * 2});
+  }
+
+  @media (min-width: $desktop) {
+    width: calc(100% - #{$container-padding-laptop * 2});
+  }
+}
+
+.content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+
+  @include mobile {
+    flex-direction: row;
+    text-align: center;
+  }
+}
+
+.icon {
+  font-size: 20px;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.text {
+  margin: 0;
+  color: $text-primary;
+  font-family: var(--font-ibm-plex-mono);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: center;
+
+  @include tablet {
+    font-size: 15px;
+  }
+}

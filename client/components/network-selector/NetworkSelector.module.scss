@@ -1,0 +1,244 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+// Incompatible network badge
+.incompatibleBadge {
+  margin-left: auto;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.networkSelector {
+  position: relative;
+}
+
+.triggerButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 4px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all $transition-base;
+  color: $text-primary;
+  font-family: var(--font-inter);
+  font-size: 16px;
+
+  &.switching {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.networkIcon {
+  display: flex;
+  align-items: center;
+}
+
+.iconCircle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+}
+
+.iconText {
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.iconImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.chevron {
+  width: 12px;
+  height: 8px;
+  transition: transform $transition-base;
+  color: #FFFFFF;
+
+  &.chevronUp {
+    transform: rotate(180deg);
+  }
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 280px;
+  max-width: 320px;
+  background: rgba(20, 30, 30, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px 24px;
+  animation: fadeInDown 0.2s ease-out;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+
+  @include mobile {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    min-width: 280px;
+    max-width: calc(100vw - 40px);
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+.dropdownContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.networkOption {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all $transition-base;
+  color: #808080;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &.active {
+    color: #FFFFFF;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.optionContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.radioButton {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.radioButtonInner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $primary-color;
+}
+
+.networkInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.networkIconOption {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.networkName {
+  font-size: 16px;
+  font-weight: 500;
+  color: inherit;
+  text-align: left;
+}
+
+.aptosWarning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 165, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  span {
+    font-size: 13px;
+    color: #FFA500;
+    line-height: 1.3;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@include mobile {
+  .triggerButton {
+    padding: 3px 6px 3px 3px;
+    gap: 6px;
+  }
+
+  .iconCircle {
+    width: 24px;
+    height: 24px;
+  }
+
+  .iconText {
+    font-size: 14px;
+  }
+
+  .networkOption {
+    padding: 10px;
+  }
+
+  .networkIconOption {
+    width: 20px;
+    height: 20px;
+  }
+
+  .networkName {
+    font-size: 14px;
+  }
+}

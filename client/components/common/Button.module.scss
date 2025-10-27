@@ -1,0 +1,106 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    cursor: pointer;
+    position: relative;
+    transition: all $transition-base;
+    
+    span {
+        position: relative;
+    }
+    
+    .arrow {
+        width: 11px;
+        height: 11px;
+        transition: filter $transition-base;
+    }
+    
+    // Underline always visible, disappears on hover
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        transition: opacity $transition-base;
+        opacity: 1;
+    }
+    
+    // Text and arrow color variants
+    &.dark {
+        color: #011919;
+        
+        .arrow {
+            filter: none; // Dark arrow
+        }
+        
+        &::after {
+            background: #011919; // Dark underline
+        }
+    }
+    
+    &.white {
+        color: $text-primary;
+        
+        .arrow {
+            filter: brightness(0) invert(1); // White arrow
+        }
+        
+        &::after {
+            background: $text-primary; // White underline
+        }
+    }
+    
+    // Hover color variants
+    &.primary {
+        &:hover,
+        &:focus {
+            color: $primary-color;
+            
+            &::after {
+                opacity: 0; // Underline disappears
+            }
+            
+            .arrow {
+                filter: brightness(0) saturate(100%) invert(84%) sepia(21%) saturate(2193%) hue-rotate(93deg) brightness(101%) contrast(99%); // Green arrow
+            }
+        }
+    }
+    
+    &.teal {
+        &:hover,
+        &:focus {
+            color: #31DDBB;
+            
+            &::after {
+                opacity: 0; // Underline disappears
+            }
+            
+            .arrow {
+                filter: brightness(0) saturate(100%) invert(90%) sepia(67%) saturate(556%) hue-rotate(123deg) brightness(103%) contrast(92%); // Teal arrow
+            }
+        }
+    }
+    
+    // When hover is disabled, only remove underline but keep original color
+    &:hover,
+    &:focus {
+        &::after {
+            opacity: 0; // Underline always disappears on hover
+        }
+    }
+}

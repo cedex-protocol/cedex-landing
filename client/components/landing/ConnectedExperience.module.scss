@@ -1,0 +1,89 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.connectedExperienceSection {
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+        padding-bottom: 0 !important;
+    }
+
+    @include mobile {
+        padding-bottom: 100px !important;
+    }
+}
+
+.backgroundContainer {
+    background-image: url('/images/Union.svg');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 300px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    padding-bottom: 35px;
+
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+        min-height: 200px;
+    }
+
+    @include mobile {
+        background-image: url('/images/Union_mobile.svg');
+        flex-direction: column;
+        align-items: flex-start;
+        padding-bottom: 0;
+        padding-top: 35px;
+        padding-left: 20px;
+        gap: 32px;
+        justify-content: center
+    }
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    @include mobile {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
+.title {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 64px;
+    line-height: 90%;
+    letter-spacing: -4%;
+    color: #011919;
+    margin: 0;
+
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+        font-size: 32px;
+        text-align: left;
+    }
+
+    @include mobile {
+        font-size: 32px;
+        text-align: left;
+
+        br {
+            display: none;
+        }
+    }
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    @include mobile {
+        justify-content: flex-start;
+    }
+}
+

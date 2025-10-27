@@ -1,0 +1,264 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.mysteryFeaturesSection {
+  position: relative;
+  background: transparent;
+
+  @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+    padding-top: 100px !important;
+    padding-bottom: 100px !important;
+  }
+
+  @include mobile {
+    padding-top: 100px !important;
+    padding-bottom: 100px !important;
+  }
+}
+
+.contentWrapper {
+  background: transparent;
+}
+
+.title {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 80px;
+  line-height: 90%;
+  letter-spacing: -4%;
+  vertical-align: middle;
+  margin-bottom: 32px;
+
+  @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+    font-size: 36px;
+
+    br {
+      display: none;
+    }
+  }
+
+  @include mobile {
+    font-size: 36px;
+    margin-bottom: 24px;
+
+    br {
+      display: none;
+    }
+  }
+}
+
+.tabsContainer {
+  margin-top: 80px;
+
+  @include mobile {
+    margin-top: 0;
+  }
+}
+
+.tabsNavigation {
+  display: flex;
+  gap: 16px;
+  border-bottom: 1px solid #2a2a2a;
+
+  @include mobile {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.tabButton {
+  background: none;
+  border: none;
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 32px;
+  line-height: 120%;
+  letter-spacing: -4%;
+  text-align: center;
+  vertical-align: middle;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 20px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid transparent;
+  flex: 1;
+
+  @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+    font-size: 20px;
+  }
+
+  @include mobile {
+    font-size: 18px;
+    padding: 16px 8px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    color: #fff;
+  }
+
+  &.active {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 32px;
+
+    line-height: 120%;
+    letter-spacing: -4%;
+    text-align: center;
+    vertical-align: middle;
+    color: #01fe91;
+    border-bottom-color: #01fe91;
+    filter: drop-shadow(0px 0px 4px #01fe91);
+
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+      font-size: 20px;
+    }
+
+    @include mobile {
+      font-size: 18px;
+    }
+  }
+}
+
+.tabContent {
+  min-height: 200px;
+  padding: 120px 100px;
+  backdrop-filter: blur(20px);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+
+  @include mobile {
+    padding: 60px 20px;
+  }
+}
+
+.tabPanel {
+  animation: fadeIn 0.3s ease-in-out;
+  position: relative;
+}
+
+.tabTitle {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 50px;
+  line-height: 120%;
+  letter-spacing: -4%;
+  text-align: center;
+  vertical-align: middle;
+  color: #fff;
+  position: relative;
+  padding: 30px 0 30px 0;
+
+  @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+    font-size: 32px;
+  }
+
+  @include mobile {
+    font-size: 24px;
+    padding: 20px 0;
+  }
+}
+
+.tabVector {
+  position: absolute;
+  opacity: 0.3;
+  width: 60px;
+  height: 60px;
+  
+  &.topLeft {
+    top: 0%;
+    left: 0%;
+    
+    &:nth-child(2) {
+      left: 70px;
+    }
+  }
+  
+  &.bottomRight {
+    bottom: 0%;
+    right: 5%;
+    transform: rotate(180deg);
+    
+    &:nth-child(4) {
+      right: calc(5% + 70px);
+    }
+  }
+  
+  @include mobile {
+    width: 40px;
+    height: 40px;
+    
+    &.topLeft:nth-child(2) {
+      left: 45px;
+    }
+    
+    &.bottomRight:nth-child(4) {
+      right: calc(5% + 45px);
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.learnSecretButton {
+  padding: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: $text-primary;
+  font-family: var(--font-ibm-plex-mono);
+  font-size: $font-size-lg;
+  cursor: pointer;
+  position: relative;
+  transition: all $transition-base;
+  
+  .buttonText {
+    position: relative;
+  }
+  
+  .buttonArrow {
+    width: 11px;
+    height: 11px;
+    filter: brightness(0) invert(1);
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 1px;
+    background: $text-primary;
+    transition: width $transition-base;
+  }
+  
+  &:hover,
+  &:focus {
+    &::after {
+      width: calc(100% + 32px);
+    }
+  }
+}

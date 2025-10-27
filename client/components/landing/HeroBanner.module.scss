@@ -1,0 +1,180 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.heroSection {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 100vh;
+  background: #000000;
+  width: 100%;
+}
+
+.videoBackground {
+}
+
+.particles {
+  @include absolute-fill;
+  
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    @include pulse-animation;
+    
+    &.particle1 {
+      top: 25%;
+      left: 25%;
+      width: 8px;
+      height: 8px;
+      background: rgba($primary-color, 0.3);
+    }
+    
+    &.particle2 {
+      top: 33%;
+      right: 33%;
+      width: 4px;
+      height: 4px;
+      background: rgba($secondary-color, 0.4);
+      animation-delay: 75ms;
+    }
+    
+    &.particle3 {
+      bottom: 33%;
+      left: 33%;
+      width: 6px;
+      height: 6px;
+      background: rgba($primary-color, 0.2);
+      animation-delay: 150ms;
+    }
+    
+    &.particle4 {
+      top: 50%;
+      right: 25%;
+      width: 8px;
+      height: 8px;
+      background: rgba($secondary-color, 0.3);
+      animation-delay: 300ms;
+    }
+    
+    &.particle5 {
+      bottom: 25%;
+      right: 50%;
+      width: 4px;
+      height: 4px;
+      background: rgba($primary-color, 0.4);
+      animation-delay: 500ms;
+    }
+  }
+}
+
+.waveSvg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50vh;
+  
+  .wavePath {
+    animation: wave 20s linear infinite;
+  }
+  
+  .wavePathSlow {
+    animation: wave-slow 30s linear infinite;
+    opacity: 0.5;
+  }
+}
+
+.contentWrapper {
+  position: relative;
+  width: 100%;
+  flex: 1;
+}
+
+.content {
+  text-align: left;
+  
+  @include mobile {
+    text-align: center;
+  }
+}
+
+.title {
+  margin: 0;
+  margin-bottom: 40px;
+  padding: 0;
+  font-family: var(--font-ibm-plex-mono);
+  color: $primary-color;
+  font-size: 90px;
+  font-weight: 700;
+  line-height: 100px;
+  text-align: left;
+
+  @include mobile {
+    font-size: 60px;
+    line-height: 70px;
+  }
+
+  .whiteText {
+    color: $text-primary;
+  }
+
+  .italicText {
+    font-style: italic;
+  }
+}
+
+.description {
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  font-size: $font-size-lg;
+  max-width: 600px;
+  margin-bottom: $spacing-2xl;
+  line-height: 1.3;
+  font-family: var(--font-ibm-plex-mono);
+  font-weight: 400;
+  text-align: left;
+}
+
+.discoverButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: $text-primary;
+  font-size: $font-size-lg;
+  font-family: var(--font-ibm-plex-mono);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color $transition-base;
+  
+  &:hover {
+    color: $primary-color;
+    
+    .buttonText {
+      border-color: $primary-color;
+    }
+    
+    .buttonArrow {
+      transform: translateX(4px);
+    }
+  }
+  
+  .buttonText {
+    margin-right: $spacing-sm;
+    border-bottom: 1px solid $text-primary;
+    transition: border-color $transition-base;
+  }
+  
+  .buttonArrow {
+    width: 20px;
+    height: 20px;
+    transition: transform $transition-base;
+    
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
