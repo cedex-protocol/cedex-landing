@@ -68,11 +68,6 @@ https://docs.cedra.network/getting-started/faucet
 # 3. Deploy
 # 4. Mint NFT
 ```
-
-### For Aptos Deployment
-
-```bash
-
 ---
 
 ## Key Features

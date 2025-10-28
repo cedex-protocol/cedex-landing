@@ -29,46 +29,6 @@ npm start
 
 Visit [http://localhost:3000](http://localhost:3000)
 
-## 🏗 Project Structure
-
-```
-cedex-landing-page/
-├── app/                    # Next.js 15 App Router
-│   ├── layout.tsx         # Root layout with providers
-│   ├── page.tsx           # Landing page composition
-│   └── providers.tsx      # Wagmi + TanStack Query setup
-│
-├── components/            # React components (organized by feature)
-│   ├── common/           # Reusable UI (Button, Modal, VideoBackground)
-│   ├── header/           # Navigation & header
-│   ├── landing/          # Landing sections (Hero, Features, etc.)
-│   ├── network-selector/ # Network switching UI
-│   └── wallet-sidebar/   # Wallet connection & NFT minting flows
-│
-├── contexts/              # Global state management
-│   ├── WalletProvider.tsx    # Wallet connection logic
-│   ├── NFTProvider.tsx       # NFT data & roles
-│   └── UIProvider.tsx        # UI state (modals, sidebar)
-│
-├── lib/                   # Core libraries
-│   ├── constants/        # Network configs, query settings
-│   ├── nft/              # NFT service layer (multi-chain)
-│   │   ├── services/    # EVMNFTService, AptosNFTService, CedraNFTService
-│   │   ├── hooks/       # useNFTQuery, useNFTData
-│   │   └── utils/       # Caching, image resolution
-│   └── wallet/           # Wallet connection utilities
-│       ├── hooks/       # EVM, Aptos, Cedra wallet hooks
-│       └── utils/       # Network validation, wallet detection
-│
-├── public/               # Static assets
-│   ├── icons/           # Network & wallet logos
-│   └── images/          # Background images
-│
-└── styles/              # Global SCSS
-    ├── _variables.scss  # Design tokens
-    └── _mixins.scss     # Reusable mixins
-```
-
 ## 🔧 Tech Stack
 
 | Category | Technology | Version |
@@ -316,17 +276,6 @@ npm run start
 - **Component structure**: Props interface → Component → Export
 - **Naming**: PascalCase for components, camelCase for utilities
 - **File organization**: Group by feature, not by type
-
-## 🤝 Contributing
-
-This is an open-source template. Feel free to:
-- Fork and customize for your project
-- Submit PRs for improvements
-- Report issues or suggest features
-
-## 📄 License
-
-MIT License - feel free to use this project as a template for your own Web3 applications.
 
 ## 🔗 Useful Links
 
