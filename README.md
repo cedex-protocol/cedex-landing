@@ -14,14 +14,14 @@ This repository contains smart contracts and frontend client for the CEDEX Genes
 
 ## Repository Structure
 
-### [Smart Contracts](cedex-landing/contracts/)
+### [Smart Contracts](contracts/)
 Smart contract implementations for all supported chains. Includes tests, and configuration.
 
 - EVM contracts (Solidity)
 - Cedra contracts (Move)
 - Aptos contracts (Move)
 
-### [< Frontend Client](cedex-landing/client/)
+### [Frontend Client](client/)
 Web application for interacting with the deployed contracts across multiple chains.
 
 ## Contributing
@@ -40,4 +40,4 @@ Built by **Cedra contributors** as an open-source multi-chain NFT solution.
 
 ---
 
-**Learn more**: Visit [cedex.app](https://cedex.app/) or join our [Discord](https://discord.gg/m99cHqRNm2)
+**Learn more**: Visit [cedex.app](https://cedex.app/)
