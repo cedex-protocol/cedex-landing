@@ -37,6 +37,8 @@ Please ensure your code follows the existing style and includes appropriate test
 ## Credits
 
 Built by **Cedra contributors** as an open-source multi-chain NFT solution.
+- **Contracts**: [@ya-dvorovenko](https://github.com/ya-dvorovenko)
+- **Client**: [@strong-dragon](https://github.com/strong-dragon)
 
 ---
 
