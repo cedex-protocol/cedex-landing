@@ -1,0 +1,11 @@
+[package]
+name = "GenesisNFT"
+version = "0.0.1"
+
+
+[dependencies]
+CedraFramework = { git = "https://github.com/cedra-labs/cedra-framework.git", subdir = "cedra-framework", rev = "main" }
+CedraTokenObjects = { git = "https://github.com/cedra-labs/cedra-framework.git", subdir = "cedra-token-objects", rev = "main" }
+
+[addresses]
+GenesisNFT = "0x55d83975e9ea7f213c7b882ce796d5a3d4776bfde1fe26aa810cc99b0f3d0f39"

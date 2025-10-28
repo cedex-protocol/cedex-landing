@@ -1,0 +1,17 @@
+.cedra
+.aptos
+.claude
+*/build
+node_modules
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.env.production
+*/artifacts
+*/cache
+node_modules
+package-lock.json

@@ -1,0 +1,11 @@
+[package]
+name = "GenesisNFT"
+version = "0.0.1"
+
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "testnet" }
+AptosTokenObjects = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-token-objects", rev = "testnet" }
+
+[addresses]
+GenesisNFT = "0x6c81ac414d689bd5a7ba6b2a2851735b5dfc911b96b2b7bb89f1601e1edb5a45"
