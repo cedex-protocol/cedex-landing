@@ -1,62 +1,84 @@
-# Role-Based NFT Contract
-## Contract Details
+# CEDEX Genesis - Multi-Chain NFT Contracts
 
-- **Name**: Genesis
-- **Symbol**: GENESIS
-- **Standard**: ERC721
-- **Max Supply**: 10,000
-- **Max Per Wallet**: 3 (one per role)
+## What is this?
 
-## Roles
+These are smart contracts for **CEDEX Genesis NFTs** - a multi-chain NFT collection designed to onboard new users to the CEDEX ecosystem. Users can mint role-based NFTs on their preferred blockchain, making it easy to reach users across different communities.
 
-1. **Trader** (Role ID: 0)
-2. **Liquidity Provider** (Role ID: 1)
-3. **Holder** (Role ID: 2)
+## Why Multi-Chain?
 
-## Installation
+By deploying on multiple blockchains, we can:
+- **Reach more users** - Users on Ethereum, Arbitrum, BSC, Polygon, Cedra, and Aptos can all participate
+- **Lower barriers** - Users choose networks based on their preferences for gas costs and speed
+- **Flexibility** - Deploy where your community is active
+
+## What are the NFTs?
+
+**Genesis Collection**: 10,000 NFTs total, 3 per wallet max (one of each role)
+
+**Three Roles:**
+1. **Trader** - For active traders
+2. **Liquidity Provider** - For users providing liquidity
+3. **Holder** - For long-term holders
+
+**Free minting** - Users only pay network gas fees
+
+## Supported Networks
+
+### EVM Chains (Solidity)
+- Ethereum, Arbitrum, BSC, Polygon
+- High compatibility, large user base
+
+### Move Chains (Move Language)
+- **Cedra** - High-performance Move blockchain
+- **Aptos** - Fast Layer 1 with low fees
+
+---
+
+## Quick Start
+
+### For EVM Deployment (Ethereum, Arbitrum, BSC, Polygon)
 
 ```bash
+# 1. Install
 cd evm
 npm install
-```
 
-## Configuration
+# 2. Setup environment
+.env.example .env
+# Edit .env and add your PRIVATE_KEY
 
-1. Copy `.env.example` to `.env`
-2. Add your private key and RPC URLs
-3. Add block explorer API keys for contract verification
-
-## Compile
-
-```bash
-npm run compile
-```
-
-## Test
-
-```bash
+# 3. Test locally
 npm run test
-```
 
-## Deploy
-
-Deploy to local Hardhat network:
-```bash
-npm run deploy:local
-```
-
-Deploy to mainnet chains:
-```bash
+# 4. Deploy
 npm run deploy:ethereum
-npm run deploy:arbitrum
-npm run deploy:bsc
-npm run deploy:polygon
+# or: deploy:arbitrum, deploy:bsc, deploy:polygon
 ```
 
-## Security
+### For Cedra Deployment
 
-- Ownership controls for admin functions
-- Pauseable mechanism for emergency stops
-- Role duplication prevention
-- Wallet limit enforcement
-- Supply cap enforcement
+```bash
+# 1. Install Cedra CLI
+https://github.com/cedra-labs/cedra-network/releases/tag/cedra-cli-v1.0.4
+
+# 2. Setup account
+cd cedra
+https://docs.cedra.network/getting-started/faucet
+
+# 3. Deploy
+# 4. Mint NFT
+```
+
+### For Aptos Deployment
+
+```bash
+
+---
+
+## Key Features
+
+- **Role-based minting** - Users choose their role
+- **Multi-chain support** - Deploy on 6+ networks
+- **Free minting** - Only gas fees
+- **Admin controls** - Pause/unpause minting
+- **Security** - Role limits, supply caps, pauseable
