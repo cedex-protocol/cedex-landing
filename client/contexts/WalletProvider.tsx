@@ -17,7 +17,7 @@ import {
 } from "@/lib/wallet";
 import { useEvmWallet } from "@/lib/wallet/hooks/useEvmWallet";
 import { useAptosWalletConnection } from "@/lib/wallet/hooks/useAptosWalletConnection";
-import { useCedraWalletConnection } from "@/lib/wallet/hooks/useCedraWalletConnection";
+import { useCedraWalletStandard } from "@/lib/wallet/hooks/useCedraWalletStandard";
 import { useNetworkValidation } from "@/lib/wallet/hooks/useNetworkValidation";
 
 interface WalletContextType {
@@ -33,6 +33,7 @@ interface WalletContextType {
 
   connectedWalletType: 'evm' | 'aptos' | 'cedra' | null;
   aptosAddress: string | null;
+  cedraAddress: string | null;
   selectedWalletId: WalletId | '';
   moveNetwork: MoveNetwork;
 
@@ -57,7 +58,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const evmWallet = useEvmWallet(preferredChainId);
   const aptosWallet = useAptosWalletConnection();
-  const cedraWallet = useCedraWalletConnection();
+  const cedraWallet = useCedraWalletStandard();
   const networkValidation = useNetworkValidation({
     aptosNetwork: aptosWallet.aptosNetwork,
     isAptosConnected: aptosWallet.isAptosConnected,
@@ -328,6 +329,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         preferredChainId,
         connectedWalletType,
         aptosAddress: aptosWallet.aptosAddress,
+        cedraAddress: cedraWallet.cedraAddress,
         selectedWalletId,
         moveNetwork,
         connectWallet,

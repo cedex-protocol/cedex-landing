@@ -27,15 +27,20 @@ export default function NFTInfoScreen({ userNFTs }: NFTInfoScreenProps) {
   const hasMultipleNFTs = userNFTs.length > 1;
 
   const chainId = useChainId();
-  const { aptosAddress, connectedWalletType } = useWallet();
+  const { aptosAddress, cedraAddress, connectedWalletType } = useWallet();
   const contractAddress = getEVMContractAddress(chainId);
   const { getImageForNFT } = useNFTImages();
 
   const networkType = connectedWalletType === 'cedra' ? 'cedra' : connectedWalletType === 'aptos' ? 'aptos' : 'evm';
+
+  const walletAddress = networkType === 'cedra' ? cedraAddress :
+                        networkType === 'aptos' ? aptosAddress :
+                        contractAddress;
+
   const explorerURL = getNFTAssetURL({
     networkType,
     chainId,
-    address: aptosAddress || contractAddress || '',
+    address: walletAddress || '',
     tokenId: currentNFT.tokenId,
   });
   const marketplaceName = getMarketplaceName(networkType);
