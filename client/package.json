@@ -13,6 +13,7 @@
     "@aptos-labs/wallet-adapter-core": "^7.6.0",
     "@aptos-labs/wallet-adapter-react": "^7.1.0",
     "@cedra-labs/ts-sdk": "^2.2.6",
+    "@cedra-labs/wallet-standard": "^0.5.1",
     "@tanstack/react-query": "^5.87.1",
     "framer-motion": "^12.23.12",
     "next": "15.1.6",

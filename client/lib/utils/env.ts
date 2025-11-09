@@ -1,7 +1,7 @@
 export const getEnvVar = (key: string): string => {
-  // Access via specific keys for Next.js to inline at build time
   const envMap: Record<string, string | undefined> = {
     'NEXT_PUBLIC_CEDRA_FULLNODE': process.env.NEXT_PUBLIC_CEDRA_FULLNODE,
+    'NEXT_PUBLIC_CEDRA_INDEXER': process.env.NEXT_PUBLIC_CEDRA_INDEXER,
     'NEXT_PUBLIC_CEDRA_FAUCET': process.env.NEXT_PUBLIC_CEDRA_FAUCET,
     'NEXT_PUBLIC_CEDRA_EXPLORER': process.env.NEXT_PUBLIC_CEDRA_EXPLORER,
     'NEXT_PUBLIC_CEDRA_NFT_MODULE_ADDRESS': process.env.NEXT_PUBLIC_CEDRA_NFT_MODULE_ADDRESS,

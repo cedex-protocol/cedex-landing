@@ -15,13 +15,16 @@ interface NFTSuccessScreenProps {
 export default function NFTSuccessScreen({ onClose, shouldRefresh = true }: NFTSuccessScreenProps) {
   const chainId = useChainId();
   const { refetch } = useNFTQuery();
-  const { aptosAddress, connectedWalletType } = useWallet();
+  const { aptosAddress, cedraAddress, connectedWalletType } = useWallet();
 
   const networkType = connectedWalletType === 'cedra' ? 'cedra' : connectedWalletType === 'aptos' ? 'aptos' : 'evm';
+
+  const walletAddress = networkType === 'cedra' ? cedraAddress : aptosAddress;
+
   const explorerURL = getNFTCollectionURL({
     networkType,
     chainId,
-    address: aptosAddress || '',
+    address: walletAddress || '',
   });
   const marketplaceName = getMarketplaceName(networkType);
 

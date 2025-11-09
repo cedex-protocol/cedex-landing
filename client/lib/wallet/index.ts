@@ -14,6 +14,6 @@ export * from './utils/addressFormatter';
 // Hooks
 export * from './hooks/useEvmWallet';
 export * from './hooks/useAptosWalletConnection';
-export * from './hooks/useCedraWalletConnection';
+export * from './hooks/useCedraWalletStandard';
 export * from './hooks/useNetworkValidation';
 export * from './hooks/useWalletDetection';
