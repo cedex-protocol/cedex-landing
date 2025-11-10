@@ -222,7 +222,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         await evmWallet.connectEvm();
         setConnectedWalletType('evm');
       }
-      else if (walletId === WALLET_IDS.NIGHTLY) {
+      else if (walletId === WALLET_IDS.NIGHTLY || walletId === WALLET_IDS.ZEDRA) {
         if (evmWallet.isEvmConnected) {
           evmWallet.disconnectEvm();
           await new Promise(resolve => setTimeout(resolve, 100));

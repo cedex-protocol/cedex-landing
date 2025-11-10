@@ -77,7 +77,8 @@ export default function WalletSidebarPortal() {
         let result;
 
         if (connectedWalletType === 'cedra' && moveNetwork === 'cedra') {
-          const provider = getWalletProvider(WALLET_IDS.NIGHTLY) as CedraProvider;
+          const walletId = selectedWalletId === WALLET_IDS.ZEDRA ? WALLET_IDS.ZEDRA : WALLET_IDS.NIGHTLY;
+          const provider = getWalletProvider(walletId) as CedraProvider;
           if (!provider) {
             throw new Error("Cedra wallet provider not found");
           }

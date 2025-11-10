@@ -41,8 +41,10 @@ export function useWalletDetection(): WalletDetectionResult {
 
     let detectedWallet: DetectedWallet = 'none';
 
-    if (selectedWalletId === WALLET_IDS.NIGHTLY && window.nightly?.aptos && walletAddress) {
+    if (selectedWalletId === WALLET_IDS.NIGHTLY && walletProvider && walletAddress) {
       detectedWallet = WALLET_IDS.NIGHTLY;
+    } else if (selectedWalletId === WALLET_IDS.ZEDRA && walletProvider && walletAddress) {
+      detectedWallet = WALLET_IDS.ZEDRA;
     } else if (selectedWalletId === WALLET_IDS.PETRA && window.petra && aptosAddress) {
       detectedWallet = WALLET_IDS.PETRA;
     } else if (selectedWalletId === WALLET_IDS.PONTEM) {

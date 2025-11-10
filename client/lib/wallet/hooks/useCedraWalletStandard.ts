@@ -15,8 +15,8 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
   const [isCedraConnected, setIsCedraConnected] = useState(false);
   const [availableCedraWallets, setAvailableCedraWallets] = useState<CedraWallet[]>([]);
   const [connectedWallet, setConnectedWallet] = useState<CedraWallet | null>(null);
-
-  useEffect(() => {
+  const [connectedWalletId, setConnectedWalletId] = useState<WalletId | null>(null);
+useEffect(() => {
     const { cedraWallets, on } = getCedraWallets();
     setAvailableCedraWallets(cedraWallets);
 
@@ -31,22 +31,22 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
   }, []);
 
   const connectCedraWallet = useCallback(async (walletId: WalletId) => {
-    if (walletId !== WALLET_IDS.NIGHTLY) {
-      throw new Error('Only Nightly wallet is supported for Cedra');
+    if (walletId !== WALLET_IDS.NIGHTLY && walletId !== WALLET_IDS.ZEDRA) {
+      throw new Error('Only Nightly and Zedra wallets are supported for Cedra');
     }
 
     try {
-      const nightlyWallet = availableCedraWallets.find(wallet =>
-        wallet.name.toLowerCase().includes('nightly')
+      const selectedWallet = availableCedraWallets.find(wallet =>
+        wallet.name.toLowerCase().includes(walletId.toLowerCase())
       );
 
-      if (!nightlyWallet) {
-        throw new Error('Nightly wallet is not installed. Please install Nightly extension.');
+      if (!selectedWallet) {
+        throw new Error(`${walletId.charAt(0).toUpperCase() + walletId.slice(1)} wallet is not installed. Please install ${walletId.charAt(0).toUpperCase() + walletId.slice(1)} extension.`);
       }
 
-      const connectFeature = nightlyWallet.features['cedra:connect'];
+      const connectFeature = selectedWallet.features['cedra:connect'];
       if (!connectFeature) {
-        throw new Error('Nightly wallet does not support cedra:connect feature');
+        throw new Error(`${walletId.charAt(0).toUpperCase() + walletId.slice(1)} wallet does not support cedra:connect feature`);
       }
 
       const response = await connectFeature.connect();
@@ -56,9 +56,10 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
         const address = accountInfo.address.toString();
         setCedraAddress(address);
         setIsCedraConnected(true);
-        setConnectedWallet(nightlyWallet);
+        setConnectedWallet(selectedWallet);
+        setConnectedWalletId(walletId);
 
-        const onAccountChangeFeature = nightlyWallet.features['cedra:onAccountChange'];
+        const onAccountChangeFeature = selectedWallet.features['cedra:onAccountChange'];
         if (onAccountChangeFeature) {
           onAccountChangeFeature.onAccountChange((newAccount) => {
             if (newAccount) {
@@ -67,6 +68,7 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
               setCedraAddress(null);
               setIsCedraConnected(false);
               setConnectedWallet(null);
+              setConnectedWalletId(null);
             }
           });
         }
@@ -80,14 +82,14 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
   }, [availableCedraWallets]);
 
   const disconnectCedraWallet = useCallback(async () => {
-    if (connectedWallet) {
+    if (connectedWallet && connectedWalletId) {
       const disconnectFeature = connectedWallet.features['cedra:disconnect'];
 
       if (disconnectFeature && typeof disconnectFeature.disconnect === 'function') {
         try {
           await disconnectFeature.disconnect();
         } catch (error) {
-          handleWalletError(error, WALLET_IDS.NIGHTLY, 'useCedraWalletStandard.disconnect', {
+          handleWalletError(error, connectedWalletId, 'useCedraWalletStandard.disconnect', {
             silent: true,
           });
         }
@@ -97,7 +99,8 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
     setCedraAddress(null);
     setIsCedraConnected(false);
     setConnectedWallet(null);
-  }, [connectedWallet]);
+    setConnectedWalletId(null);
+  }, [connectedWallet, connectedWalletId]);
 
   return {
     cedraAddress,

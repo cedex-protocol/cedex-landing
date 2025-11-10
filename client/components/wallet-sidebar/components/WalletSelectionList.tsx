@@ -51,6 +51,8 @@ export default function WalletSelectionList({
       localStorage.setItem('cedex_retry_wallet', 'metamask');
     } else if (errorMessage.includes('nightly')) {
       localStorage.setItem('cedex_retry_wallet', 'nightly');
+    } else if (errorMessage.includes('zedra')) {
+      localStorage.setItem('cedex_retry_wallet', 'zedra');
     } else if (errorMessage.includes('pontem')) {
       localStorage.setItem('cedex_retry_wallet', selectedWallet || 'pontem');
     }

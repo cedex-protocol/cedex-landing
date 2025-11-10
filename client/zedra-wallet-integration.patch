@@ -1,0 +1,445 @@
+diff --git a/.env.example b/.env.example
+index 06d4405..d0892ca 100644
+--- a/.env.example
++++ b/.env.example
+@@ -68,6 +68,7 @@ NEXT_PUBLIC_SOCIAL_DISCORD_URL=https://discord.com/channels/YOUR_SERVER_ID/YOUR_
+ NEXT_PUBLIC_PETRA_WALLET_URL=https://petra.app/
+ NEXT_PUBLIC_PONTEM_WALLET_URL=https://pontem.network/
+ NEXT_PUBLIC_NIGHTLY_WALLET_URL=https://nightly.app/
++NEXT_PUBLIC_ZEDRA_WALLET_URL=https://zedra.app/
+ NEXT_PUBLIC_METAMASK_WALLET_URL=https://metamask.io/download/
+ 
+ # ============================================
+diff --git a/components/network-selector/NetworkSelector.tsx b/components/network-selector/NetworkSelector.tsx
+index 29fa6cc..f5b593f 100644
+--- a/components/network-selector/NetworkSelector.tsx
++++ b/components/network-selector/NetworkSelector.tsx
+@@ -208,7 +208,11 @@ export default function NetworkSelector() {
+               let tooltipMessage = '';
+ 
+               if (detectedWallet !== 'none' && isConnected) {
+-                if (detectedWallet === 'nightly' && network.id === APTOS_NETWORK_ID) {
++                if ((detectedWallet === 'nightly' || detectedWallet === 'zedra') && network.id === APTOS_NETWORK_ID) {
++                  isWalletIncompatible = true;
++                  tooltipMessage = `${getWalletName(detectedWallet)} only supports Cedra network`;
++                }
++                else if ((detectedWallet === 'nightly' || detectedWallet === 'zedra') && network.type === 'evm') {
+                   isWalletIncompatible = true;
+                   tooltipMessage = `${getWalletName(detectedWallet)} only supports Cedra network`;
+                 }
+diff --git a/components/wallet-sidebar/WalletSidebar.tsx b/components/wallet-sidebar/WalletSidebar.tsx
+index 43d4d94..7094a72 100644
+--- a/components/wallet-sidebar/WalletSidebar.tsx
++++ b/components/wallet-sidebar/WalletSidebar.tsx
+@@ -46,6 +46,7 @@ interface WalletSidebarProps {
+ 
+ const walletOptions: WalletOption[] = [
+   { id: "nightly", name: "Nightly", icon: "/wallets-icon/Nightly logo.svg" },
++  { id: "zedra", name: "Zedra", icon: "/wallets-icon/zedra.png" },
+   { id: "petra", name: "Petra", icon: "/wallets-icon/petra.avif" },
+   { id: "pontem", name: "Pontem", icon: "/wallets-icon/pontem.svg" },
+   { id: "metamask", name: "MetaMask", icon: "/wallets-icon/metamask logo.png" },
+@@ -71,15 +72,21 @@ export default function WalletSidebar({
+     if (contextWalletId === 'petra') {
+       return moveNetwork === 'aptos';
+     }
+-    if (contextWalletId === 'nightly') {
+-      return moveNetwork === 'aptos' || moveNetwork === 'cedra';
++    if (contextWalletId === 'nightly' || contextWalletId === 'zedra') {
++      return moveNetwork === 'cedra';
+     }
+     return true;
+   })();
+ 
+-  const networkError = !isNetworkValid && contextWalletId === 'petra' && moveNetwork === 'cedra'
+-    ? 'Petra wallet does not support Cedra network. Please switch back to Aptos network or use Nightly wallet for Cedra.'
+-    : null;
++  const networkError = (() => {
++    if (!isNetworkValid && contextWalletId === 'petra' && moveNetwork === 'cedra') {
++      return 'Petra wallet does not support Cedra network. Please switch back to Aptos network or use Nightly/Zedra wallet for Cedra.';
++    }
++    if (!isNetworkValid && (contextWalletId === 'nightly' || contextWalletId === 'zedra') && moveNetwork === 'aptos') {
++      return 'Nightly and Zedra wallets only support Cedra network. Please switch to Cedra network or use a different wallet for Aptos.';
++    }
++    return null;
++  })();
+   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
+   const [mintingState, setMintingState] = useState<'preview' | 'minting' | 'success' | 'error' | 'max_supply'>('preview');
+   const [mintError, setMintError] = useState<string>('');
+diff --git a/components/wallet-sidebar/WalletSidebarPortal.tsx b/components/wallet-sidebar/WalletSidebarPortal.tsx
+index 8652919..6745b5b 100644
+--- a/components/wallet-sidebar/WalletSidebarPortal.tsx
++++ b/components/wallet-sidebar/WalletSidebarPortal.tsx
+@@ -77,7 +77,8 @@ export default function WalletSidebarPortal() {
+         let result;
+ 
+         if (connectedWalletType === 'cedra' && moveNetwork === 'cedra') {
+-          const provider = getWalletProvider(WALLET_IDS.NIGHTLY) as CedraProvider;
++          const walletId = selectedWalletId === WALLET_IDS.ZEDRA ? WALLET_IDS.ZEDRA : WALLET_IDS.NIGHTLY;
++          const provider = getWalletProvider(walletId) as CedraProvider;
+           if (!provider) {
+             throw new Error("Cedra wallet provider not found");
+           }
+diff --git a/components/wallet-sidebar/components/WalletSelectionList.tsx b/components/wallet-sidebar/components/WalletSelectionList.tsx
+index 9c3b5e5..61f5ad0 100644
+--- a/components/wallet-sidebar/components/WalletSelectionList.tsx
++++ b/components/wallet-sidebar/components/WalletSelectionList.tsx
+@@ -51,6 +51,8 @@ export default function WalletSelectionList({
+       localStorage.setItem('cedex_retry_wallet', 'metamask');
+     } else if (errorMessage.includes('nightly')) {
+       localStorage.setItem('cedex_retry_wallet', 'nightly');
++    } else if (errorMessage.includes('zedra')) {
++      localStorage.setItem('cedex_retry_wallet', 'zedra');
+     } else if (errorMessage.includes('pontem')) {
+       localStorage.setItem('cedex_retry_wallet', selectedWallet || 'pontem');
+     }
+diff --git a/contexts/WalletProvider.tsx b/contexts/WalletProvider.tsx
+index 8c583f4..4a5d4f6 100644
+--- a/contexts/WalletProvider.tsx
++++ b/contexts/WalletProvider.tsx
+@@ -218,7 +218,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
+         await evmWallet.connectEvm();
+         setConnectedWalletType('evm');
+       }
+-      else if (walletId === WALLET_IDS.NIGHTLY) {
++      else if (walletId === WALLET_IDS.NIGHTLY || walletId === WALLET_IDS.ZEDRA) {
+         if (evmWallet.isEvmConnected) {
+           evmWallet.disconnectEvm();
+           await new Promise(resolve => setTimeout(resolve, 100));
+diff --git a/lib/nft/services/CedraNFTService.ts b/lib/nft/services/CedraNFTService.ts
+index 2f96306..c0567e7 100644
+--- a/lib/nft/services/CedraNFTService.ts
++++ b/lib/nft/services/CedraNFTService.ts
+@@ -1,4 +1,4 @@
+-import { Cedra, CedraConfig, parseTypeTag, AccountAuthenticator } from "@cedra-labs/ts-sdk";
++import { Cedra, CedraConfig, parseTypeTag } from "@cedra-labs/ts-sdk";
+ import { BaseNFTService } from './BaseNFTService';
+ import type { NFTData, MintResult, NetworkType } from '../types';
+ import { getRoleName, NFTRole } from '../types';
+@@ -82,46 +82,63 @@ export class CedraNFTService extends BaseNFTService {
+         return { success: false, error: validation.error };
+       }
+ 
+-      const transaction = await this.client.transaction.build.simple({
+-        sender: address,
+-        data: {
+-          function: `${CEDRA_NFT_CONFIG.moduleAddress}::${CEDRA_NFT_CONFIG.moduleName}::${CEDRA_NFT_CONFIG.functions.mint}`,
+-          functionArguments: [role],
+-        },
+-        options: {
+-          maxGasAmount: 5000,
+-          faAddress: parseTypeTag("0x1::CedraCoin::cedra"),
+-        },
+-      });
++      const txHash = provider.features['cedra:signAndSubmitTransaction']
++        ? await this.signAndSubmit(provider, role)
++        : await this.signThenSubmit(provider, address, role);
+ 
+-      // Get wallet sign transaction feature
+-      const signFeature = provider.features['cedra:signTransaction'];
+-      if (!signFeature) {
+-        throw new Error('Wallet does not support cedra:signTransaction');
+-      }
++      await this.client.waitForTransaction({ transactionHash: txHash });
++      return { success: true, hash: txHash };
++    } catch (error) {
++      return this.handleError(error, 'Mint NFT');
++    }
++  }
+ 
+-      // Sign transaction with user's wallet
+-      const signResult = await signFeature.signTransaction(transaction);
+-      if (signResult.status !== 'Approved') {
+-        throw new Error('Transaction signing was rejected');
+-      }
++  private async signAndSubmit(provider: CedraProvider, role: NFTRole): Promise<string> {
++    const feature = provider.features['cedra:signAndSubmitTransaction']!;
+ 
+-      // Extract authenticator (supports both V1.0 and V1.1 wallet formats)
+-      const authenticator: AccountAuthenticator = 'authenticator' in signResult.args
+-        ? (signResult.args as any).authenticator
+-        : signResult.args as AccountAuthenticator;
++    const result = await feature.signAndSubmitTransaction({
++      payload: {
++        function: `${CEDRA_NFT_CONFIG.moduleAddress}::${CEDRA_NFT_CONFIG.moduleName}::${CEDRA_NFT_CONFIG.functions.mint}`,
++        functionArguments: [role],
++        typeArguments: [],
++      },
++      maxGasAmount: 5000,
++    });
+ 
+-      const result = await this.client.transaction.submit.simple({
+-        transaction,
+-        senderAuthenticator: authenticator,
+-      });
++    if (result.status !== 'Approved' || !('args' in result)) {
++      throw new Error('Transaction signing was rejected');
++    }
+ 
+-      await this.client.waitForTransaction({ transactionHash: result.hash });
++    return result.args.hash;
++  }
+ 
+-      return { success: true, hash: result.hash };
+-    } catch (error) {
+-      return this.handleError(error, 'Mint NFT');
++  private async signThenSubmit(provider: CedraProvider, address: string, role: NFTRole): Promise<string> {
++    const transaction = await this.client.transaction.build.simple({
++      sender: address,
++      data: {
++        function: `${CEDRA_NFT_CONFIG.moduleAddress}::${CEDRA_NFT_CONFIG.moduleName}::${CEDRA_NFT_CONFIG.functions.mint}`,
++        functionArguments: [role],
++      },
++      options: {
++        maxGasAmount: 5000,
++        faAddress: parseTypeTag("0x1::CedraCoin::cedra"),
++      },
++    });
++
++    const signResult = await provider.features['cedra:signTransaction']!.signTransaction(transaction);
++
++    if (signResult.status !== 'Approved' || !('args' in signResult)) {
++      throw new Error('Transaction signing was rejected');
+     }
++
++    const authenticator = (signResult.args as any).authenticator ?? signResult.args;
++
++    const result = await this.client.transaction.submit.simple({
++      transaction,
++      senderAuthenticator: authenticator,
++    });
++
++    return result.hash;
+   }
+ 
+   private async getAccountAddress(provider: CedraProvider): Promise<string | null> {
+diff --git a/lib/utils/env.ts b/lib/utils/env.ts
+index 0f1a89a..7f8c291 100644
+--- a/lib/utils/env.ts
++++ b/lib/utils/env.ts
+@@ -20,6 +20,7 @@ export const getEnvVar = (key: string): string => {
+     'NEXT_PUBLIC_PETRA_WALLET_URL': process.env.NEXT_PUBLIC_PETRA_WALLET_URL,
+     'NEXT_PUBLIC_PONTEM_WALLET_URL': process.env.NEXT_PUBLIC_PONTEM_WALLET_URL,
+     'NEXT_PUBLIC_NIGHTLY_WALLET_URL': process.env.NEXT_PUBLIC_NIGHTLY_WALLET_URL,
++    'NEXT_PUBLIC_ZEDRA_WALLET_URL': process.env.NEXT_PUBLIC_ZEDRA_WALLET_URL,
+     'NEXT_PUBLIC_METAMASK_WALLET_URL': process.env.NEXT_PUBLIC_METAMASK_WALLET_URL,
+   };
+ 
+diff --git a/lib/wallet/constants/walletIds.ts b/lib/wallet/constants/walletIds.ts
+index 6f75166..4612055 100644
+--- a/lib/wallet/constants/walletIds.ts
++++ b/lib/wallet/constants/walletIds.ts
+@@ -4,6 +4,7 @@ export const WALLET_IDS = {
+   PETRA: 'petra',
+   PONTEM: 'pontem',
+   NIGHTLY: 'nightly',
++  ZEDRA: 'zedra',
+   METAMASK: 'metamask',
+ } as const;
+ 
+@@ -15,6 +16,7 @@ export const WALLET_NAMES: Record<WalletId, string> = {
+   [WALLET_IDS.PETRA]: 'Petra',
+   [WALLET_IDS.PONTEM]: 'Pontem',
+   [WALLET_IDS.NIGHTLY]: 'Nightly',
++  [WALLET_IDS.ZEDRA]: 'Zedra',
+   [WALLET_IDS.METAMASK]: 'MetaMask',
+ } as const;
+ 
+@@ -22,6 +24,7 @@ export const WALLET_DOWNLOAD_URLS: Record<WalletId, string> = {
+   [WALLET_IDS.PETRA]: getEnvVar('NEXT_PUBLIC_PETRA_WALLET_URL'),
+   [WALLET_IDS.PONTEM]: getEnvVar('NEXT_PUBLIC_PONTEM_WALLET_URL'),
+   [WALLET_IDS.NIGHTLY]: getEnvVar('NEXT_PUBLIC_NIGHTLY_WALLET_URL'),
++  [WALLET_IDS.ZEDRA]: getEnvVar('NEXT_PUBLIC_ZEDRA_WALLET_URL'),
+   [WALLET_IDS.METAMASK]: getEnvVar('NEXT_PUBLIC_METAMASK_WALLET_URL'),
+ } as const;
+ 
+diff --git a/lib/wallet/hooks/useCedraWalletStandard.ts b/lib/wallet/hooks/useCedraWalletStandard.ts
+index 14816bb..e2b0920 100644
+--- a/lib/wallet/hooks/useCedraWalletStandard.ts
++++ b/lib/wallet/hooks/useCedraWalletStandard.ts
+@@ -15,8 +15,8 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
+   const [isCedraConnected, setIsCedraConnected] = useState(false);
+   const [availableCedraWallets, setAvailableCedraWallets] = useState<CedraWallet[]>([]);
+   const [connectedWallet, setConnectedWallet] = useState<CedraWallet | null>(null);
+-
+-  useEffect(() => {
++  const [connectedWalletId, setConnectedWalletId] = useState<WalletId | null>(null);
++useEffect(() => {
+     const { cedraWallets, on } = getCedraWallets();
+     setAvailableCedraWallets(cedraWallets);
+ 
+@@ -31,22 +31,22 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
+   }, []);
+ 
+   const connectCedraWallet = useCallback(async (walletId: WalletId) => {
+-    if (walletId !== WALLET_IDS.NIGHTLY) {
+-      throw new Error('Only Nightly wallet is supported for Cedra');
++    if (walletId !== WALLET_IDS.NIGHTLY && walletId !== WALLET_IDS.ZEDRA) {
++      throw new Error('Only Nightly and Zedra wallets are supported for Cedra');
+     }
+ 
+     try {
+-      const nightlyWallet = availableCedraWallets.find(wallet =>
+-        wallet.name.toLowerCase().includes('nightly')
++      const selectedWallet = availableCedraWallets.find(wallet =>
++        wallet.name.toLowerCase().includes(walletId.toLowerCase())
+       );
+ 
+-      if (!nightlyWallet) {
+-        throw new Error('Nightly wallet is not installed. Please install Nightly extension.');
++      if (!selectedWallet) {
++        throw new Error(`${walletId.charAt(0).toUpperCase() + walletId.slice(1)} wallet is not installed. Please install ${walletId.charAt(0).toUpperCase() + walletId.slice(1)} extension.`);
+       }
+ 
+-      const connectFeature = nightlyWallet.features['cedra:connect'];
++      const connectFeature = selectedWallet.features['cedra:connect'];
+       if (!connectFeature) {
+-        throw new Error('Nightly wallet does not support cedra:connect feature');
++        throw new Error(`${walletId.charAt(0).toUpperCase() + walletId.slice(1)} wallet does not support cedra:connect feature`);
+       }
+ 
+       const response = await connectFeature.connect();
+@@ -56,9 +56,10 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
+         const address = accountInfo.address.toString();
+         setCedraAddress(address);
+         setIsCedraConnected(true);
+-        setConnectedWallet(nightlyWallet);
++        setConnectedWallet(selectedWallet);
++        setConnectedWalletId(walletId);
+ 
+-        const onAccountChangeFeature = nightlyWallet.features['cedra:onAccountChange'];
++        const onAccountChangeFeature = selectedWallet.features['cedra:onAccountChange'];
+         if (onAccountChangeFeature) {
+           onAccountChangeFeature.onAccountChange((newAccount) => {
+             if (newAccount) {
+@@ -67,6 +68,7 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
+               setCedraAddress(null);
+               setIsCedraConnected(false);
+               setConnectedWallet(null);
++              setConnectedWalletId(null);
+             }
+           });
+         }
+@@ -80,14 +82,14 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
+   }, [availableCedraWallets]);
+ 
+   const disconnectCedraWallet = useCallback(async () => {
+-    if (connectedWallet) {
++    if (connectedWallet && connectedWalletId) {
+       const disconnectFeature = connectedWallet.features['cedra:disconnect'];
+ 
+       if (disconnectFeature && typeof disconnectFeature.disconnect === 'function') {
+         try {
+           await disconnectFeature.disconnect();
+         } catch (error) {
+-          handleWalletError(error, WALLET_IDS.NIGHTLY, 'useCedraWalletStandard.disconnect', {
++          handleWalletError(error, connectedWalletId, 'useCedraWalletStandard.disconnect', {
+             silent: true,
+           });
+         }
+@@ -97,7 +99,8 @@ export function useCedraWalletStandard(): CedraWalletStandardState {
+     setCedraAddress(null);
+     setIsCedraConnected(false);
+     setConnectedWallet(null);
+-  }, [connectedWallet]);
++    setConnectedWalletId(null);
++  }, [connectedWallet, connectedWalletId]);
+ 
+   return {
+     cedraAddress,
+diff --git a/lib/wallet/hooks/useWalletDetection.ts b/lib/wallet/hooks/useWalletDetection.ts
+index aa84c30..d3273ef 100644
+--- a/lib/wallet/hooks/useWalletDetection.ts
++++ b/lib/wallet/hooks/useWalletDetection.ts
+@@ -43,6 +43,8 @@ export function useWalletDetection(): WalletDetectionResult {
+ 
+     if (selectedWalletId === WALLET_IDS.NIGHTLY && walletProvider && walletAddress) {
+       detectedWallet = WALLET_IDS.NIGHTLY;
++    } else if (selectedWalletId === WALLET_IDS.ZEDRA && walletProvider && walletAddress) {
++      detectedWallet = WALLET_IDS.ZEDRA;
+     } else if (selectedWalletId === WALLET_IDS.PETRA && window.petra && aptosAddress) {
+       detectedWallet = WALLET_IDS.PETRA;
+     } else if (selectedWalletId === WALLET_IDS.PONTEM) {
+diff --git a/lib/wallet/utils/networkMapping.ts b/lib/wallet/utils/networkMapping.ts
+index 83436aa..ddfefc9 100644
+--- a/lib/wallet/utils/networkMapping.ts
++++ b/lib/wallet/utils/networkMapping.ts
+@@ -4,6 +4,7 @@ import type { MoveNetwork } from '../types/providers';
+ export function getDefaultNetwork(walletId: WalletId): MoveNetwork {
+   switch (walletId) {
+     case WALLET_IDS.NIGHTLY:
++    case WALLET_IDS.ZEDRA:
+       return 'cedra';
+     case WALLET_IDS.PETRA:
+     case WALLET_IDS.PONTEM:
+@@ -16,7 +17,8 @@ export function getDefaultNetwork(walletId: WalletId): MoveNetwork {
+ export function getSupportedNetworks(walletId: WalletId): MoveNetwork[] {
+   switch (walletId) {
+     case WALLET_IDS.NIGHTLY:
+-      return ['aptos', 'cedra'];
++    case WALLET_IDS.ZEDRA:
++      return ['cedra'];
+     case WALLET_IDS.PETRA:
+     case WALLET_IDS.PONTEM:
+       return ['aptos'];
+@@ -36,7 +38,7 @@ export function getWalletType(walletId: WalletId): 'evm' | 'aptos' | 'cedra' {
+     return 'evm';
+   }
+ 
+-  if (walletId === WALLET_IDS.NIGHTLY) {
++  if (walletId === WALLET_IDS.NIGHTLY || walletId === WALLET_IDS.ZEDRA) {
+     return 'cedra';
+   }
+ 
+diff --git a/lib/wallet/utils/walletDetection.ts b/lib/wallet/utils/walletDetection.ts
+index 797bc6e..c0068e3 100644
+--- a/lib/wallet/utils/walletDetection.ts
++++ b/lib/wallet/utils/walletDetection.ts
+@@ -26,6 +26,13 @@ export function getWalletProvider(walletId: WalletId): WalletProvider {
+       );
+       return nightlyWallet as unknown as WalletProvider || null;
+ 
++    case WALLET_IDS.ZEDRA:
++      const { cedraWallets: zedraWallets } = getCedraWallets();
++      const zedraWallet = zedraWallets.find(wallet =>
++        wallet.name.toLowerCase().includes('zedra')
++      );
++      return zedraWallet as unknown as WalletProvider || null;
++
+     case WALLET_IDS.METAMASK:
+       return (window.ethereum as EthereumProvider) || null;
+ 
+@@ -123,6 +130,9 @@ export function extractWalletIdFromError(errorMessage: string): WalletId | null
+   if (lowerMessage.includes('nightly')) {
+     return WALLET_IDS.NIGHTLY;
+   }
++  if (lowerMessage.includes('zedra')) {
++    return WALLET_IDS.ZEDRA;
++  }
+   if (lowerMessage.includes('metamask')) {
+     return WALLET_IDS.METAMASK;
+   }
+diff --git a/public/wallets-icon/WalletConnect logo.png b/public/wallets-icon/WalletConnect logo.png
+deleted file mode 100644
+index dc70f3a..0000000
+Binary files a/public/wallets-icon/WalletConnect logo.png and /dev/null differ
+diff --git a/public/wallets-icon/Zedra.png b/public/wallets-icon/Zedra.png
+new file mode 100644
+index 0000000..5149722
+Binary files /dev/null and b/public/wallets-icon/Zedra.png differ
+diff --git a/public/wallets-icon/petra logo.png b/public/wallets-icon/petra logo.png
+deleted file mode 100644
+index b940f26..0000000
+Binary files a/public/wallets-icon/petra logo.png and /dev/null differ
+diff --git a/public/wallets-icon/petra.svg b/public/wallets-icon/petra.svg
+deleted file mode 100644
+index 7b851b5..0000000
+--- a/public/wallets-icon/petra.svg
++++ /dev/null
+@@ -1,5 +0,0 @@
+-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+-  <rect width="40" height="40" rx="8" fill="#FF5369"/>
+-  <path d="M20 10L26.928 15.5V24.5L20 30L13.072 24.5V15.5L20 10Z" fill="white"/>
+-  <path d="M20 14L23.464 17V21L20 24L16.536 21V17L20 14Z" fill="#FF5369"/>
+-</svg>
+\ No newline at end of file

@@ -46,6 +46,7 @@ interface WalletSidebarProps {
 
 const walletOptions: WalletOption[] = [
   { id: "nightly", name: "Nightly", icon: "/wallets-icon/Nightly logo.svg" },
+  { id: "zedra", name: "Zedra", icon: "/wallets-icon/zedra.png" },
   { id: "petra", name: "Petra", icon: "/wallets-icon/petra.avif" },
   { id: "pontem", name: "Pontem", icon: "/wallets-icon/pontem.svg" },
   { id: "metamask", name: "MetaMask", icon: "/wallets-icon/metamask logo.png" },
@@ -71,15 +72,21 @@ export default function WalletSidebar({
     if (contextWalletId === 'petra') {
       return moveNetwork === 'aptos';
     }
-    if (contextWalletId === 'nightly') {
-      return moveNetwork === 'aptos' || moveNetwork === 'cedra';
+    if (contextWalletId === 'nightly' || contextWalletId === 'zedra') {
+      return moveNetwork === 'cedra';
     }
     return true;
   })();
 
-  const networkError = !isNetworkValid && contextWalletId === 'petra' && moveNetwork === 'cedra'
-    ? 'Petra wallet does not support Cedra network. Please switch back to Aptos network or use Nightly wallet for Cedra.'
-    : null;
+  const networkError = (() => {
+    if (!isNetworkValid && contextWalletId === 'petra' && moveNetwork === 'cedra') {
+      return 'Petra wallet does not support Cedra network. Please switch back to Aptos network or use Nightly/Zedra wallet for Cedra.';
+    }
+    if (!isNetworkValid && (contextWalletId === 'nightly' || contextWalletId === 'zedra') && moveNetwork === 'aptos') {
+      return 'Nightly and Zedra wallets only support Cedra network. Please switch to Cedra network or use a different wallet for Aptos.';
+    }
+    return null;
+  })();
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [mintingState, setMintingState] = useState<'preview' | 'minting' | 'success' | 'error' | 'max_supply'>('preview');
   const [mintError, setMintError] = useState<string>('');
