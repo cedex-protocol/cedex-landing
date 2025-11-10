@@ -3,9 +3,9 @@ import type {
   WalletProvider,
   PetraProvider,
   PontemProvider,
-  NightlyAptosProvider,
   EthereumProvider,
 } from '../types/providers';
+import { getCedraWallets } from '@cedra-labs/wallet-standard';
 
 export function getWalletProvider(walletId: WalletId): WalletProvider {
   if (typeof window === 'undefined') {
@@ -20,7 +20,18 @@ export function getWalletProvider(walletId: WalletId): WalletProvider {
       return (window.pontem as PontemProvider) || null;
 
     case WALLET_IDS.NIGHTLY:
-      return (window.nightly?.aptos as NightlyAptosProvider) || null;
+      const { cedraWallets: nightlyWallets } = getCedraWallets();
+      const nightlyWallet = nightlyWallets.find(wallet =>
+        wallet.name.toLowerCase().includes('nightly')
+      );
+      return nightlyWallet as unknown as WalletProvider || null;
+
+    case WALLET_IDS.ZEDRA:
+      const { cedraWallets: zedraWallets } = getCedraWallets();
+      const zedraWallet = zedraWallets.find(wallet =>
+        wallet.name.toLowerCase().includes('zedra')
+      );
+      return zedraWallet as unknown as WalletProvider || null;
 
     case WALLET_IDS.METAMASK:
       return (window.ethereum as EthereumProvider) || null;
@@ -118,6 +129,9 @@ export function extractWalletIdFromError(errorMessage: string): WalletId | null 
   }
   if (lowerMessage.includes('nightly')) {
     return WALLET_IDS.NIGHTLY;
+  }
+  if (lowerMessage.includes('zedra')) {
+    return WALLET_IDS.ZEDRA;
   }
   if (lowerMessage.includes('metamask')) {
     return WALLET_IDS.METAMASK;

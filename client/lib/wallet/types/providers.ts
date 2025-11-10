@@ -1,4 +1,5 @@
 import type { WalletContextState } from "@aptos-labs/wallet-adapter-react";
+import type { CedraWallet } from '@cedra-labs/wallet-standard';
 
 export interface TransactionPayload {
   function: string;
@@ -102,7 +103,7 @@ export function isNightlyProvider(provider: unknown): provider is NightlyAptosPr
   );
 }
 
-export type CedraProvider = NightlyAptosProvider;
+export type CedraProvider = CedraWallet;
 export type MoveNetwork = 'cedra' | 'aptos';
 export type AptosProvider = BaseAptosProvider;
 

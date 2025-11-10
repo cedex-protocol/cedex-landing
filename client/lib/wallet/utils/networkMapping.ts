@@ -4,6 +4,7 @@ import type { MoveNetwork } from '../types/providers';
 export function getDefaultNetwork(walletId: WalletId): MoveNetwork {
   switch (walletId) {
     case WALLET_IDS.NIGHTLY:
+    case WALLET_IDS.ZEDRA:
       return 'cedra';
     case WALLET_IDS.PETRA:
     case WALLET_IDS.PONTEM:
@@ -16,7 +17,8 @@ export function getDefaultNetwork(walletId: WalletId): MoveNetwork {
 export function getSupportedNetworks(walletId: WalletId): MoveNetwork[] {
   switch (walletId) {
     case WALLET_IDS.NIGHTLY:
-      return ['aptos', 'cedra'];
+    case WALLET_IDS.ZEDRA:
+      return ['cedra'];
     case WALLET_IDS.PETRA:
     case WALLET_IDS.PONTEM:
       return ['aptos'];
@@ -36,7 +38,7 @@ export function getWalletType(walletId: WalletId): 'evm' | 'aptos' | 'cedra' {
     return 'evm';
   }
 
-  if (walletId === WALLET_IDS.NIGHTLY) {
+  if (walletId === WALLET_IDS.NIGHTLY || walletId === WALLET_IDS.ZEDRA) {
     return 'cedra';
   }
 

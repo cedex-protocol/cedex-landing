@@ -208,11 +208,14 @@ export default function NetworkSelector() {
               let tooltipMessage = '';
 
               if (detectedWallet !== 'none' && isConnected) {
-                if (detectedWallet === 'nightly' && network.id === APTOS_NETWORK_ID) {
+                if ((detectedWallet === 'nightly' || detectedWallet === 'zedra') && network.id === APTOS_NETWORK_ID) {
                   isWalletIncompatible = true;
                   tooltipMessage = `${getWalletName(detectedWallet)} only supports Cedra network`;
                 }
-
+                else if ((detectedWallet === 'nightly' || detectedWallet === 'zedra') && network.type === 'evm') {
+                  isWalletIncompatible = true;
+                  tooltipMessage = `${getWalletName(detectedWallet)} only supports Cedra network`;
+                }
                 else if (network.id === CEDRA_NETWORK_ID && !supportsNetwork(detectedWallet, 'cedra')) {
                   isWalletIncompatible = true;
                   tooltipMessage = `${getWalletName(detectedWallet)} does not support Cedra network`;
