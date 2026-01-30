@@ -1,54 +1,32 @@
-import { WALLET_IDS, type WalletId } from '../constants/walletIds';
+import { WALLET_IDS } from '../constants/walletIds';
 import type { MoveNetwork } from '../types/providers';
 
-export function getDefaultNetwork(walletId: WalletId): MoveNetwork {
-  switch (walletId) {
-    case WALLET_IDS.NIGHTLY:
-    case WALLET_IDS.ZEDRA:
-      return 'cedra';
-    case WALLET_IDS.PETRA:
-    case WALLET_IDS.PONTEM:
-      return 'aptos';
-    default:
-      return 'aptos';
-  }
-}
+type WalletType = 'evm' | 'aptos' | 'cedra';
 
-export function getSupportedNetworks(walletId: WalletId): MoveNetwork[] {
-  switch (walletId) {
-    case WALLET_IDS.NIGHTLY:
-    case WALLET_IDS.ZEDRA:
-      return ['cedra'];
-    case WALLET_IDS.PETRA:
-    case WALLET_IDS.PONTEM:
-      return ['aptos'];
-    case WALLET_IDS.METAMASK:
-      return [];
-    default:
-      return [];
-  }
-}
-
-export function supportsNetwork(walletId: WalletId, network: MoveNetwork): boolean {
-  return getSupportedNetworks(walletId).includes(network);
-}
-
-export function getWalletType(walletId: WalletId): 'evm' | 'aptos' | 'cedra' {
-  if (walletId === WALLET_IDS.METAMASK) {
-    return 'evm';
-  }
-
-  if (walletId === WALLET_IDS.NIGHTLY || walletId === WALLET_IDS.ZEDRA) {
-    return 'cedra';
-  }
-
+export function getWalletType(walletId: string, isCedraWallet?: (name: string) => boolean): WalletType {
+  if (walletId === WALLET_IDS.METAMASK) return 'evm';
+  if (isCedraWallet?.(walletId)) return 'cedra';
   return 'aptos';
 }
 
-export function isMoveWallet(walletId: WalletId): boolean {
-  return walletId !== WALLET_IDS.METAMASK;
+export function getDefaultNetwork(walletId: string, isCedraWallet?: (name: string) => boolean): MoveNetwork {
+  return isCedraWallet?.(walletId) ? 'cedra' : 'aptos';
 }
 
-export function isEvmWallet(walletId: WalletId): boolean {
+export function getSupportedNetworks(walletId: string, isCedraWallet?: (name: string) => boolean): MoveNetwork[] {
+  if (walletId === WALLET_IDS.METAMASK) return [];
+  if (isCedraWallet?.(walletId)) return ['cedra'];
+  return ['aptos'];
+}
+
+export function supportsNetwork(walletId: string, network: MoveNetwork, isCedraWallet?: (name: string) => boolean): boolean {
+  return getSupportedNetworks(walletId, isCedraWallet).includes(network);
+}
+
+export function isEvmWallet(walletId: string): boolean {
   return walletId === WALLET_IDS.METAMASK;
+}
+
+export function isMoveWallet(walletId: string): boolean {
+  return !isEvmWallet(walletId);
 }

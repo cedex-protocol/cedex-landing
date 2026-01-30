@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useScrollLock } from "../../hooks/useScrollLock";
 import Image from "next/image";
 import styles from "./WalletSidebar.module.scss";
@@ -18,8 +18,9 @@ import Button from "../common/Button";
 import { useWallet } from "../../contexts/WalletProvider";
 import { useNFTQuery } from "@/lib/nft/hooks/useNFTQuery";
 import { truncateAddress, useWalletDetection } from "@/lib/wallet";
+import { useCedraWalletStandard } from "@/lib/wallet/hooks/useCedraWalletStandard";
 
-interface WalletOption {
+export interface WalletOption {
   id: string;
   name: string;
   icon: string;
@@ -44,12 +45,10 @@ interface WalletSidebarProps {
   onNFTMint?: () => Promise<void> | void;
 }
 
-const walletOptions: WalletOption[] = [
-  { id: "nightly", name: "Nightly", icon: "/wallets-icon/Nightly logo.svg" },
-  { id: "zedra", name: "Zedra", icon: "/wallets-icon/zedra.png" },
+const staticWalletOptions: WalletOption[] = [
   { id: "petra", name: "Petra", icon: "/wallets-icon/petra.avif" },
   { id: "pontem", name: "Pontem", icon: "/wallets-icon/pontem.svg" },
-  { id: "metamask", name: "MetaMask", icon: "/wallets-icon/metamask logo.png" },
+  { id: "metamask", name: "MetaMask", icon: "/wallets-icon/metamask.png" },
 ];
 
 export default function WalletSidebar({
@@ -65,14 +64,26 @@ export default function WalletSidebar({
   nftRole,
   onNFTMint
 }: WalletSidebarProps) {
-  const { retryConnection, disconnectWallet, moveNetwork, selectedWalletId: contextWalletId } = useWallet();
+  const { retryConnection, disconnectWallet, moveNetwork, selectedWalletId: contextWalletId, isCedraWallet } = useWallet();
   const { detectedWallet, isCorrectWallet } = useWalletDetection();
+  const { getCedraWalletInfo } = useCedraWalletStandard();
+
+  const walletOptions = useMemo(() => {
+    const cedraWallets = getCedraWalletInfo();
+    const dynamicCedraOptions: WalletOption[] = cedraWallets.map(wallet => ({
+      id: wallet.name.toLowerCase(),
+      name: wallet.name,
+      icon: wallet.icon,
+    }));
+
+    return [...dynamicCedraOptions, ...staticWalletOptions];
+  }, [getCedraWalletInfo]);
 
   const isNetworkValid = (() => {
     if (contextWalletId === 'petra') {
       return moveNetwork === 'aptos';
     }
-    if (contextWalletId === 'nightly' || contextWalletId === 'zedra') {
+    if (isCedraWallet(contextWalletId)) {
       return moveNetwork === 'cedra';
     }
     return true;
@@ -80,10 +91,10 @@ export default function WalletSidebar({
 
   const networkError = (() => {
     if (!isNetworkValid && contextWalletId === 'petra' && moveNetwork === 'cedra') {
-      return 'Petra wallet does not support Cedra network. Please switch back to Aptos network or use Nightly/Zedra wallet for Cedra.';
+      return 'Petra wallet does not support Cedra network. Please switch back to Aptos network or use a Cedra-compatible wallet.';
     }
-    if (!isNetworkValid && (contextWalletId === 'nightly' || contextWalletId === 'zedra') && moveNetwork === 'aptos') {
-      return 'Nightly and Zedra wallets only support Cedra network. Please switch to Cedra network or use a different wallet for Aptos.';
+    if (!isNetworkValid && isCedraWallet(contextWalletId) && moveNetwork === 'aptos') {
+      return 'This wallet only supports Cedra network. Please switch to Cedra network or use a different wallet for Aptos.';
     }
     return null;
   })();
@@ -103,7 +114,7 @@ export default function WalletSidebar({
 
     const walletId = selectedWalletId || detectedWallet;
     if (walletId && walletId !== 'none') {
-      return walletOptions.find(w => w.id === walletId);
+      return walletOptions.find(w => w.id.toLowerCase() === walletId.toLowerCase());
     }
 
     return null;
@@ -177,11 +188,13 @@ export default function WalletSidebar({
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
       setMintError(errorMessage);
 
-      if (errorMessage.includes('MAX_SUPPLY_REACHED')) {
-        setMintingState('max_supply');
-      } else {
-        setMintingState('error');
-      }
+      const lowerError = errorMessage.toLowerCase();
+      const isMaxSupplyError =
+        lowerError.includes('max') && lowerError.includes('supply') ||
+        errorMessage.includes('0x90002') ||
+        lowerError.includes('simulation');
+
+      setMintingState(isMaxSupplyError ? 'max_supply' : 'error');
     }
   };
 

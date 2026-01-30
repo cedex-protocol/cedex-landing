@@ -51,7 +51,12 @@ export function parseNFTError(error: unknown, network?: string): NFTError {
       );
     }
 
-    if (message.includes('max_supply') || message.includes('0x90002') || message.includes('emax_supply')) {
+    const isMaxSupply =
+      message.includes('supply') ||
+      message.includes('0x90002') ||
+      message.includes('simulation');
+
+    if (isMaxSupply) {
       return createNFTError(
         NFTErrorCode.MAX_SUPPLY_REACHED,
         'Maximum supply reached for this role',

@@ -1,22 +1,33 @@
 import { useCallback, useState, useEffect } from 'react';
 import { getCedraWallets, CedraWallet } from '@cedra-labs/wallet-standard';
-import { WALLET_IDS, type WalletId, handleWalletError } from '@/lib/wallet';
+import { handleWalletError } from '@/lib/wallet';
+
+export interface CedraWalletInfo {
+  name: string;
+  icon: string;
+}
 
 export interface CedraWalletStandardState {
   cedraAddress: string | null;
   isCedraConnected: boolean;
   availableCedraWallets: CedraWallet[];
-  connectCedraWallet: (walletId: WalletId) => Promise<void>;
+  connectedCedraWalletName: string | null;
+  connectCedraWallet: (walletName: string) => Promise<void>;
   disconnectCedraWallet: () => Promise<void>;
+  isCedraWallet: (walletName: string) => boolean;
+  getCedraWalletInfo: () => CedraWalletInfo[];
 }
+
+const DEFAULT_WALLET_ICON = '/wallets-icon/default-cedra.svg';
 
 export function useCedraWalletStandard(): CedraWalletStandardState {
   const [cedraAddress, setCedraAddress] = useState<string | null>(null);
   const [isCedraConnected, setIsCedraConnected] = useState(false);
   const [availableCedraWallets, setAvailableCedraWallets] = useState<CedraWallet[]>([]);
   const [connectedWallet, setConnectedWallet] = useState<CedraWallet | null>(null);
-  const [connectedWalletId, setConnectedWalletId] = useState<WalletId | null>(null);
-useEffect(() => {
+  const [connectedWalletName, setConnectedWalletName] = useState<string | null>(null);
+
+  useEffect(() => {
     const { cedraWallets, on } = getCedraWallets();
     setAvailableCedraWallets(cedraWallets);
 
@@ -30,23 +41,32 @@ useEffect(() => {
     };
   }, []);
 
-  const connectCedraWallet = useCallback(async (walletId: WalletId) => {
-    if (walletId !== WALLET_IDS.NIGHTLY && walletId !== WALLET_IDS.ZEDRA) {
-      throw new Error('Only Nightly and Zedra wallets are supported for Cedra');
-    }
+  const isCedraWallet = useCallback((walletName: string): boolean => {
+    return availableCedraWallets.some(wallet =>
+      wallet.name.toLowerCase() === walletName.toLowerCase()
+    );
+  }, [availableCedraWallets]);
 
+  const getCedraWalletInfo = useCallback((): CedraWalletInfo[] => {
+    return availableCedraWallets.map(wallet => ({
+      name: wallet.name,
+      icon: wallet.icon || DEFAULT_WALLET_ICON,
+    }));
+  }, [availableCedraWallets]);
+
+  const connectCedraWallet = useCallback(async (walletName: string) => {
     try {
       const selectedWallet = availableCedraWallets.find(wallet =>
-        wallet.name.toLowerCase().includes(walletId.toLowerCase())
+        wallet.name.toLowerCase() === walletName.toLowerCase()
       );
 
       if (!selectedWallet) {
-        throw new Error(`${walletId.charAt(0).toUpperCase() + walletId.slice(1)} wallet is not installed. Please install ${walletId.charAt(0).toUpperCase() + walletId.slice(1)} extension.`);
+        throw new Error(`${walletName} wallet is not installed. Please install ${walletName} extension.`);
       }
 
       const connectFeature = selectedWallet.features['cedra:connect'];
       if (!connectFeature) {
-        throw new Error(`${walletId.charAt(0).toUpperCase() + walletId.slice(1)} wallet does not support cedra:connect feature`);
+        throw new Error(`${walletName} wallet does not support cedra:connect feature`);
       }
 
       const response = await connectFeature.connect();
@@ -57,7 +77,7 @@ useEffect(() => {
         setCedraAddress(address);
         setIsCedraConnected(true);
         setConnectedWallet(selectedWallet);
-        setConnectedWalletId(walletId);
+        setConnectedWalletName(selectedWallet.name);
 
         const onAccountChangeFeature = selectedWallet.features['cedra:onAccountChange'];
         if (onAccountChangeFeature) {
@@ -68,7 +88,7 @@ useEffect(() => {
               setCedraAddress(null);
               setIsCedraConnected(false);
               setConnectedWallet(null);
-              setConnectedWalletId(null);
+              setConnectedWalletName(null);
             }
           });
         }
@@ -76,20 +96,20 @@ useEffect(() => {
         throw new Error('User rejected the connection request');
       }
     } catch (error) {
-      const walletError = handleWalletError(error, walletId, 'useCedraWalletStandard');
+      const walletError = handleWalletError(error, walletName, 'useCedraWalletStandard');
       throw new Error(walletError.message);
     }
   }, [availableCedraWallets]);
 
   const disconnectCedraWallet = useCallback(async () => {
-    if (connectedWallet && connectedWalletId) {
+    if (connectedWallet && connectedWalletName) {
       const disconnectFeature = connectedWallet.features['cedra:disconnect'];
 
       if (disconnectFeature && typeof disconnectFeature.disconnect === 'function') {
         try {
           await disconnectFeature.disconnect();
         } catch (error) {
-          handleWalletError(error, connectedWalletId, 'useCedraWalletStandard.disconnect', {
+          handleWalletError(error, connectedWalletName, 'useCedraWalletStandard.disconnect', {
             silent: true,
           });
         }
@@ -99,14 +119,17 @@ useEffect(() => {
     setCedraAddress(null);
     setIsCedraConnected(false);
     setConnectedWallet(null);
-    setConnectedWalletId(null);
-  }, [connectedWallet, connectedWalletId]);
+    setConnectedWalletName(null);
+  }, [connectedWallet, connectedWalletName]);
 
   return {
     cedraAddress,
     isCedraConnected,
     availableCedraWallets,
+    connectedCedraWalletName: connectedWalletName,
     connectCedraWallet,
     disconnectCedraWallet,
+    isCedraWallet,
+    getCedraWalletInfo,
   };
 }

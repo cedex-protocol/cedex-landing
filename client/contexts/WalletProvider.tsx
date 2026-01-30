@@ -34,20 +34,22 @@ interface WalletContextType {
   connectedWalletType: 'evm' | 'aptos' | 'cedra' | null;
   aptosAddress: string | null;
   cedraAddress: string | null;
-  selectedWalletId: WalletId | '';
+  selectedWalletId: string;
+  connectedCedraWalletName: string | null;
   moveNetwork: MoveNetwork;
 
-  connectWallet: (walletId: WalletId) => void;
+  connectWallet: (walletId: string) => void;
   disconnectWallet: () => void;
   retryConnection: () => void;
   setPreferredChainId: (chainId: number) => void;
   setMoveNetwork: (network: MoveNetwork) => void;
+  isCedraWallet: (walletName: string) => boolean;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const [selectedWalletId, setSelectedWalletId] = useState<WalletId | "">("");
+  const [selectedWalletId, setSelectedWalletId] = useState<string>("");
   const [connectionError, setConnectionError] = useState<Error | null>(null);
   const [connectedWalletType, setConnectedWalletType] = useState<'evm' | 'aptos' | 'cedra' | null>(null);
   const [preferredChainId, setPreferredChainId] = useState<number>(CEDRA_NETWORK_ID);
@@ -59,6 +61,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const evmWallet = useEvmWallet(preferredChainId);
   const aptosWallet = useAptosWalletConnection();
   const cedraWallet = useCedraWalletStandard();
+
   const networkValidation = useNetworkValidation({
     aptosNetwork: aptosWallet.aptosNetwork,
     isAptosConnected: aptosWallet.isAptosConnected,
@@ -179,12 +182,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       } else if (walletName.includes('pontem')) {
         setSelectedWalletId(WALLET_IDS.PONTEM);
         setMoveNetwork('aptos');
-      } else if (walletName.includes('nightly')) {
-        setSelectedWalletId(WALLET_IDS.NIGHTLY);
-        if (moveNetwork !== 'aptos' && moveNetwork !== 'cedra') {
-          setMoveNetwork('cedra');
-        }
       }
+      // Note: Nightly is now handled via Cedra wallet-standard, not Aptos adapter
     }
   }, [aptosWallet.currentAptosWallet, aptosWallet.isAptosConnected, moveNetwork]);
 
@@ -213,7 +212,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [connectionError]);
 
-  const connectWallet = useCallback(async (walletId: WalletId) => {
+  const connectWallet = useCallback(async (walletId: string) => {
     setSelectedWalletId(walletId);
     setConnectionError(null);
 
@@ -222,7 +221,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         await evmWallet.connectEvm();
         setConnectedWalletType('evm');
       }
-      else if (walletId === WALLET_IDS.NIGHTLY || walletId === WALLET_IDS.ZEDRA) {
+      else if (cedraWallet.isCedraWallet(walletId)) {
         if (evmWallet.isEvmConnected) {
           evmWallet.disconnectEvm();
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -240,7 +239,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
 
-        await aptosWallet.connectAptosWallet(walletId);
+        await aptosWallet.connectAptosWallet(walletId as WalletId);
 
         setMoveNetwork('aptos');
         setConnectedWalletType('aptos');
@@ -256,7 +255,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       setConnectionError(err as Error);
     }
-  }, [evmWallet, aptosWallet]);
+  }, [evmWallet, aptosWallet, cedraWallet]);
 
   const disconnectWallet = useCallback(async () => {
 
@@ -331,12 +330,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         aptosAddress: aptosWallet.aptosAddress,
         cedraAddress: cedraWallet.cedraAddress,
         selectedWalletId,
+        connectedCedraWalletName: cedraWallet.connectedCedraWalletName,
         moveNetwork,
         connectWallet,
         disconnectWallet,
         retryConnection,
         setPreferredChainId,
         setMoveNetwork,
+        isCedraWallet: cedraWallet.isCedraWallet,
       }}
     >
       {children}

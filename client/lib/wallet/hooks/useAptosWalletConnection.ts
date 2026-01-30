@@ -27,11 +27,13 @@ export interface AptosWalletConnectionState {
   isAptosConnected: boolean;
   currentAptosWallet: AptosWalletInfo | null;
   aptosNetwork: AptosNetworkInfo | null;
-  connectAptosWallet: (walletId: WalletId) => Promise<void>;
+  connectAptosWallet: (walletId: string) => Promise<void>;
   disconnectAptosWallet: () => Promise<void>;
   changeAptosNetwork: ((network: Network) => Promise<unknown>) | undefined;
   availableWallets: ReadonlyArray<AdapterWallet> | undefined;
   isWalletAdapterLoading: boolean;
+  getAptosWalletInfo: () => AptosWalletInfo[];
+  isAptosWallet: (walletId: string) => boolean;
 }
 
 export interface AptosConnectionError {
@@ -54,9 +56,23 @@ export function useAptosWalletConnection(): AptosWalletConnectionState {
 
   const aptosAddress = aptosAccount?.address ? String(aptosAccount.address) : null;
 
-  const connectAptosWallet = useCallback(async (walletId: WalletId) => {
+  const getAptosWalletInfo = useCallback((): AptosWalletInfo[] => {
+    return (availableWallets ?? [])
+      .filter(w => w.readyState === 'Installed')
+      .map(w => ({ name: w.name, icon: typeof w.icon === 'string' ? w.icon : undefined, url: w.url }));
+  }, [availableWallets]);
+
+  const isAptosWallet = useCallback((walletId: string): boolean => {
+    if (!walletId) return false;
+    const id = walletId.toLowerCase();
+    if (id === 'petra' || id === 'pontem') return true;
+    return availableWallets?.some(w => w.name.toLowerCase().includes(id)) ?? false;
+  }, [availableWallets]);
+
+  const connectAptosWallet = useCallback(async (walletId: string) => {
     try {
-      const walletName = getWalletName(walletId);
+      const isKnownWallet = walletId === WALLET_IDS.PETRA || walletId === WALLET_IDS.PONTEM;
+      const walletName = isKnownWallet ? getWalletName(walletId as WalletId) : walletId;
 
       if (!availableWallets || availableWallets.length === 0) {
         throw new Error(`Wallet adapter is still loading. Please wait a moment and try again.`);
@@ -65,9 +81,8 @@ export function useAptosWalletConnection(): AptosWalletConnectionState {
       const targetWallet = availableWallets.find(w => {
         const name = w.name.toLowerCase();
         const targetName = walletName.toLowerCase();
-        return name.includes(targetName);
+        return name === targetName || name.includes(targetName);
       });
-
 
       if (!targetWallet) {
         throw new Error(`${walletName} is not supported. Please use a supported wallet.`);
@@ -83,7 +98,7 @@ export function useAptosWalletConnection(): AptosWalletConnectionState {
       }
 
       if (walletId === WALLET_IDS.PONTEM) {
-        const provider = getWalletProvider(walletId);
+        const provider = getWalletProvider(walletId as WalletId);
         if (!provider || !('connect' in provider) || typeof provider.connect !== 'function') {
           throw new Error(`${walletName} provider not available or invalid`);
         }
@@ -98,7 +113,6 @@ export function useAptosWalletConnection(): AptosWalletConnectionState {
               }
             }
           } catch (err) {
-
           }
 
           await validatePontemNetwork();
@@ -122,15 +136,14 @@ export function useAptosWalletConnection(): AptosWalletConnectionState {
         }
       }
 
-
       try {
-        connectAptos(walletName);
+        connectAptos(targetWallet.name);
       } catch (connectionError) {
         console.error(`[useAptosWalletConnection] connectAptos() threw error:`, connectionError);
         throw connectionError;
       }
     } catch (err: unknown) {
-      const walletError = handleWalletError(err, walletId, 'useAptosWalletConnection');
+      const walletError = handleWalletError(err, walletId as WalletId, 'useAptosWalletConnection');
       throw new Error(walletError.message);
     }
   }, [connectAptos, aptosAccount, availableWallets]);
@@ -149,57 +162,31 @@ export function useAptosWalletConnection(): AptosWalletConnectionState {
     changeAptosNetwork,
     availableWallets,
     isWalletAdapterLoading,
+    getAptosWalletInfo,
+    isAptosWallet,
   };
 }
 
 async function validateAptosWalletNetwork(walletId: WalletId): Promise<void> {
   if (typeof window === 'undefined') return;
 
-  const walletName = getWalletName(walletId);
-  let provider: { network?: () => Promise<unknown> } | undefined;
-
-  if (walletId === WALLET_IDS.PETRA && window.petra) {
-    provider = window.petra;
-  } else if (walletId === WALLET_IDS.PONTEM && window.pontem) {
-    provider = window.pontem;
-  } else {
-    return;
-  }
-
-  if (!provider.network) return;
+  const provider = walletId === WALLET_IDS.PETRA ? window.petra : window.pontem;
+  if (!provider?.network) return;
 
   try {
     const network = await provider.network();
-    let networkName = '';
+    const networkName = typeof network === 'string'
+      ? network
+      : (network as { name?: string })?.name || '';
 
-    if (typeof network === 'string') {
-      networkName = network.toLowerCase();
-    } else if (network && typeof network === 'object' && 'name' in network) {
-      const nameValue = (network as { name?: unknown }).name;
-      networkName = nameValue ? String(nameValue).toLowerCase() : '';
-    }
-
-    if (networkName.includes('mainnet')) {
-      throw new Error(
-        `${walletName} is currently on Mainnet. Please switch to Testnet:\n\n` +
-        `1. Open ${walletName} extension\n` +
-        `2. Click on the network name at the top\n` +
-        `3. Select "Testnet" from the dropdown\n` +
-        `4. Try connecting again`
-      );
+    if (networkName.toLowerCase().includes('mainnet')) {
+      const walletName = getWalletName(walletId);
+      throw new Error(`${walletName} is on Mainnet. Please switch to Testnet and try again.`);
     }
   } catch (error) {
-    if (error instanceof Error && error.message.includes('Mainnet')) {
-      throw error;
-    }
-    console.warn(`[validateAptosWalletNetwork] Could not validate ${walletName} network:`, error);
+    if (error instanceof Error && error.message.includes('Mainnet')) throw error;
   }
 }
 
-async function validatePetraNetwork(): Promise<void> {
-  return validateAptosWalletNetwork(WALLET_IDS.PETRA);
-}
-
-async function validatePontemNetwork(): Promise<void> {
-  return validateAptosWalletNetwork(WALLET_IDS.PONTEM);
-}
+const validatePetraNetwork = () => validateAptosWalletNetwork(WALLET_IDS.PETRA);
+const validatePontemNetwork = () => validateAptosWalletNetwork(WALLET_IDS.PONTEM);

@@ -1,6 +1,5 @@
-import { WalletErrorCode, parseWalletError, type WalletError } from '../types/errors';
-import type { WalletId } from '../constants/walletIds';
-import { getWalletInfo, getWalletName } from '../constants/walletIds';
+import { WalletErrorCode, parseWalletError, type WalletError, type WalletIdentifier } from '../types/errors';
+import { getWalletInfo, getWalletName, isValidWalletId } from '../constants/walletIds';
 
 export enum ErrorSeverity {
   INFO = 'info',
@@ -10,23 +9,9 @@ export enum ErrorSeverity {
 }
 
 export function getErrorSeverity(code: WalletErrorCode): ErrorSeverity {
-  switch (code) {
-    case WalletErrorCode.USER_REJECTED:
-      return ErrorSeverity.INFO;
-
-    case WalletErrorCode.NOT_INSTALLED:
-      return ErrorSeverity.WARNING;
-
-    case WalletErrorCode.WRONG_NETWORK:
-      return ErrorSeverity.WARNING;
-
-    case WalletErrorCode.CONNECTION_FAILED:
-    case WalletErrorCode.DISCONNECTED:
-      return ErrorSeverity.ERROR;
-
-    default:
-      return ErrorSeverity.ERROR;
-  }
+  if (code === WalletErrorCode.USER_REJECTED) return ErrorSeverity.INFO;
+  if (code === WalletErrorCode.NOT_INSTALLED || code === WalletErrorCode.WRONG_NETWORK) return ErrorSeverity.WARNING;
+  return ErrorSeverity.ERROR;
 }
 
 export function logWalletError(
@@ -46,7 +31,6 @@ export function logWalletError(
   };
 
   if (error.code === WalletErrorCode.USER_REJECTED) {
-    console.log(`${prefix} User rejected the request`);
     return;
   }
 
@@ -60,7 +44,6 @@ export function logWalletError(
 
   switch (severity) {
     case ErrorSeverity.INFO:
-      console.log(`${prefix}`, errorInfo);
       break;
 
     case ErrorSeverity.WARNING:
@@ -80,14 +63,14 @@ export function logWalletError(
 /**
  * Handle wallet error with consistent logging and formatting
  * @param error - The error to handle
- * @param walletId - Optional wallet ID for context
+ * @param walletId - Optional wallet ID or wallet name for context
  * @param context - Optional context string for logging
  * @param options - Additional options
  * @returns Formatted WalletError
  */
 export function handleWalletError(
   error: unknown,
-  walletId?: WalletId,
+  walletId?: WalletIdentifier,
   context?: string,
   options?: {
     silent?: boolean;
@@ -106,11 +89,17 @@ export function handleWalletError(
 }
 
 export function shouldShowErrorToUser(error: WalletError): boolean {
-  if (error.code === WalletErrorCode.USER_REJECTED) {
-    return false;
-  }
+  return error.code !== WalletErrorCode.USER_REJECTED;
+}
 
-  return true;
+/**
+ * Get wallet display name - works for both static WalletId and dynamic wallet names
+ */
+function getWalletDisplayName(walletId: WalletIdentifier): string {
+  if (isValidWalletId(walletId)) {
+    return getWalletName(walletId);
+  }
+  return walletId.charAt(0).toUpperCase() + walletId.slice(1);
 }
 
 export function getUserFriendlyErrorMessage(
@@ -124,10 +113,15 @@ export function getUserFriendlyErrorMessage(
 
     case WalletErrorCode.NOT_INSTALLED: {
       if (error.walletId) {
-        const walletInfo = getWalletInfo(error.walletId);
+        if (isValidWalletId(error.walletId)) {
+          const walletInfo = getWalletInfo(error.walletId);
+          return {
+            message: `${walletInfo.name} wallet is not installed`,
+            downloadUrl: walletInfo.downloadUrl,
+          };
+        }
         return {
-          message: `${walletInfo.name} wallet is not installed`,
-          downloadUrl: walletInfo.downloadUrl,
+          message: `${getWalletDisplayName(error.walletId)} wallet is not installed`,
         };
       }
       return {
@@ -141,7 +135,7 @@ export function getUserFriendlyErrorMessage(
       };
 
     case WalletErrorCode.CONNECTION_FAILED: {
-      const walletName = error.walletId ? getWalletName(error.walletId) : 'wallet';
+      const walletName = error.walletId ? getWalletDisplayName(error.walletId) : 'wallet';
       return {
         message: `Failed to connect to ${walletName}. Please try again.`,
       };
@@ -161,7 +155,7 @@ export function getUserFriendlyErrorMessage(
 
 export async function withErrorHandling<T>(
   operation: () => Promise<T>,
-  walletId?: WalletId,
+  walletId?: WalletIdentifier,
   context?: string
 ): Promise<T> {
   try {
