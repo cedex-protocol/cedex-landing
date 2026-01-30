@@ -1,13 +1,13 @@
 import { Cedra, CedraConfig, parseTypeTag } from "@cedra-labs/ts-sdk";
-import { BaseNFTService } from "./BaseNFTService";
-import type { NFTData, MintResult, NetworkType } from "../types";
-import { getRoleName, NFTRole } from "../types";
-import { CEDRA_CONFIG, CEDRA_NFT_CONFIG } from "../constants";
+import { BaseNFTService } from './BaseNFTService';
+import type { NFTData, MintResult, NetworkType } from '../types';
+import { getRoleName, NFTRole } from '../types';
+import { CEDRA_CONFIG, CEDRA_NFT_CONFIG } from '../constants';
 import type { CedraProvider } from "@/lib/wallet";
-import { convertIpfsUrl } from "../utils/imageResolver";
+import { convertIpfsUrl } from '../utils/imageResolver';
 
 export class CedraNFTService extends BaseNFTService {
-  protected networkType: NetworkType = "cedra";
+  protected networkType: NetworkType = 'cedra';
   private client: Cedra;
 
   constructor() {
@@ -22,11 +22,9 @@ export class CedraNFTService extends BaseNFTService {
 
   private determineRole(tokenName: string, tokenDescription: string): NFTRole {
     const text = `${tokenName} ${tokenDescription}`.toLowerCase();
-    if (text.includes("trader")) return NFTRole.TRADER;
-    if (text.includes("liquidity") || text.includes("provider"))
-      return NFTRole.LIQUIDITY_PROVIDER;
-    if (text.includes("holder") || text.includes("builder"))
-      return NFTRole.HOLDER;
+    if (text.includes('trader')) return NFTRole.TRADER;
+    if (text.includes('liquidity') || text.includes('provider')) return NFTRole.LIQUIDITY_PROVIDER;
+    if (text.includes('holder') || text.includes('builder')) return NFTRole.HOLDER;
     return NFTRole.HOLDER;
   }
 
@@ -44,9 +42,9 @@ export class CedraNFTService extends BaseNFTService {
 
       for (let i = 0; i < ownedTokens.length; i++) {
         const token = ownedTokens[i];
-        const tokenName = token.current_token_data?.token_name || "";
-        const tokenDescription = token.current_token_data?.description || "";
-        const tokenUri = token.current_token_data?.token_uri || "";
+        const tokenName = token.current_token_data?.token_name || '';
+        const tokenDescription = token.current_token_data?.description || '';
+        const tokenUri = token.current_token_data?.token_uri || '';
 
         const role = this.determineRole(tokenName, tokenDescription);
 
@@ -55,19 +53,19 @@ export class CedraNFTService extends BaseNFTService {
           role,
           roleName: getRoleName(role),
           name: tokenName,
-          network: "cedra" as const,
+          network: 'cedra' as const,
           metadata: {
             description: tokenDescription,
             token_name: tokenName,
             token_data_id: token.token_data_id,
           },
-          image: convertIpfsUrl(tokenUri) || "",
+          image: convertIpfsUrl(tokenUri) || '',
         });
       }
 
       return nfts;
     } catch (error) {
-      console.error("[Cedra] Failed to fetch NFTs:", error);
+      console.error('[Cedra] Failed to fetch NFTs:', error);
       throw error;
     }
   }
@@ -76,7 +74,7 @@ export class CedraNFTService extends BaseNFTService {
     try {
       const address = await this.getAccountAddress(provider);
       if (!address) {
-        return { success: false, error: "Failed to get wallet address" };
+        return { success: false, error: 'Failed to get wallet address' };
       }
 
       const validation = await this.validateMintEligibility(address, role);
@@ -84,22 +82,31 @@ export class CedraNFTService extends BaseNFTService {
         return { success: false, error: validation.error };
       }
 
-      const txHash = provider.features["cedra:signAndSubmitTransaction"]
-        ? await this.signAndSubmit(provider, role)
-        : await this.signThenSubmit(provider, address, role);
+      const walletName = provider.name.toLowerCase();
+      const hasSignAndSubmit = !!provider.features['cedra:signAndSubmitTransaction'];
+      const hasSignTransaction = !!provider.features['cedra:signTransaction'];
+
+      const useSignThenSubmit = walletName.includes('nightly');
+
+      let txHash: string;
+
+      if (hasSignAndSubmit && !useSignThenSubmit) {
+        txHash = await this.signAndSubmit(provider, role);
+      } else if (hasSignTransaction) {
+        txHash = await this.signThenSubmit(provider, address, role);
+      } else {
+        throw new Error(`Wallet ${provider.name} does not support required signing features`);
+      }
 
       await this.client.waitForTransaction({ transactionHash: txHash });
       return { success: true, hash: txHash };
     } catch (error) {
-      return this.handleError(error, "Mint NFT");
+      return this.handleError(error, 'Mint NFT');
     }
   }
 
-  private async signAndSubmit(
-    provider: CedraProvider,
-    role: NFTRole
-  ): Promise<string> {
-    const feature = provider.features["cedra:signAndSubmitTransaction"]!;
+  private async signAndSubmit(provider: CedraProvider, role: NFTRole): Promise<string> {
+    const feature = provider.features['cedra:signAndSubmitTransaction']!;
 
     const result = await feature.signAndSubmitTransaction({
       payload: {
@@ -110,18 +117,14 @@ export class CedraNFTService extends BaseNFTService {
       maxGasAmount: 5000,
     });
 
-    if (result.status !== "Approved" || !("args" in result)) {
-      throw new Error("Transaction signing was rejected");
+    if (result.status !== 'Approved' || !('args' in result)) {
+      throw new Error('Transaction signing was rejected');
     }
 
     return result.args.hash;
   }
 
-  private async signThenSubmit(
-    provider: CedraProvider,
-    address: string,
-    role: NFTRole
-  ): Promise<string> {
+  private async signThenSubmit(provider: CedraProvider, address: string, role: NFTRole): Promise<string> {
     const transaction = await this.client.transaction.build.simple({
       sender: address,
       data: {
@@ -130,43 +133,37 @@ export class CedraNFTService extends BaseNFTService {
       },
       options: {
         maxGasAmount: 5000,
-        faAddress: parseTypeTag("0x1::CedraCoin::cedra"),
+        faAddress: parseTypeTag("0x1::cedra_coin::CedraCoin"),
       },
     });
 
-    const signResult = await provider.features[
-      "cedra:signTransaction"
-    ]!.signTransaction(transaction);
+    const signResult = await provider.features['cedra:signTransaction']!.signTransaction(transaction);
 
-    if (signResult.status !== "Approved" || !("args" in signResult)) {
-      throw new Error("Transaction signing was rejected");
+    if (signResult.status !== 'Approved') {
+      throw new Error(`Transaction signing was rejected: ${signResult.status}`);
     }
-
-    const authenticator =
-      (signResult.args as any).authenticator ?? signResult.args;
 
     const result = await this.client.transaction.submit.simple({
       transaction,
-      senderAuthenticator: authenticator,
+      senderAuthenticator: signResult.args,
     });
 
     return result.hash;
   }
 
-  private async getAccountAddress(
-    provider: CedraProvider
-  ): Promise<string | null> {
+  private async getAccountAddress(provider: CedraProvider): Promise<string | null> {
     try {
-      const accountFeature = provider.features["cedra:account"];
+      const accountFeature = provider.features['cedra:account'];
       if (!accountFeature) {
-        throw new Error("Wallet does not support cedra:account");
+        throw new Error('Wallet does not support cedra:account');
       }
 
       const accountInfo = await accountFeature.account();
       return accountInfo.address.toString();
     } catch (error) {
-      console.error("[Cedra] Failed to get account address:", error);
+      console.error('[Cedra] Failed to get account address:', error);
       return null;
     }
   }
+
 }
